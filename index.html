@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quản lý nhà – Thôn Lệ Sơn Nam (Hòa Tiến, Đà Nẵng)</title>
+<title>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
 <style>
@@ -16,39 +16,65 @@
   .legend { position:absolute; z-index:1000; bottom:34px; right:10px; background:rgba(255,255,255,.92);
             padding:8px 10px; font:12px sans-serif; border-radius:4px; box-shadow:0 1px 5px rgba(0,0,0,.4);}
   .legend i { display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-1px; }
-  #tools { position:absolute; z-index:1000; top:10px; left:52px; display:flex; gap:6px; flex-wrap:wrap; }
+  #tools { position:absolute; z-index:1000; top:10px; left:52px; display:flex; gap:6px; flex-wrap:wrap; max-width:620px; }
   #tools button { background:#fff; border:1px solid #ccc; border-radius:4px; padding:6px 10px;
                   font:13px sans-serif; cursor:pointer; box-shadow:0 1px 5px rgba(0,0,0,.4); }
   #tools button.active { background:#ffd75e; border-color:#e67e22; }
-  #searchBox { position:absolute; z-index:1000; top:44px; left:52px; width:280px;
+  #filters { position:absolute; z-index:1000; top:64px; left:52px; display:flex; gap:6px; }
+  #filters button { background:#fff; border:1px solid #ccc; border-radius:4px; padding:5px 10px;
+                    font:12.5px sans-serif; cursor:pointer; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+  #filters button.active { background:#ff9d9d; border-color:#e74c3c; }
+  #filters button.active.blue { background:#aed6f1; border-color:#2980b9; }
+  #filters button.active.purple { background:#d7b8ef; border-color:#8e44ad; }
+  #searchBox { position:absolute; z-index:1000; top:100px; left:52px; width:280px;
                font:13px sans-serif; padding:6px 8px; border:1px solid #ccc; border-radius:4px;
                box-shadow:0 1px 5px rgba(0,0,0,.4); }
-  #listPanel { position:absolute; z-index:1000; top:80px; left:52px; width:320px; max-height:60%;
+  #listPanel, #statsPanel { position:absolute; z-index:1000; top:135px; left:52px; width:350px; max-height:60%;
                background:#fff; border:1px solid #ccc; border-radius:6px; box-shadow:0 2px 10px rgba(0,0,0,.35);
                display:none; overflow-y:auto; font:13px sans-serif; }
-  #listPanel h3 { margin:0; padding:8px 10px; background:#f5f5f5; border-bottom:1px solid #ddd; font-size:14px; }
+  #statsPanel { left:415px; }
+  #listPanel h3, #statsPanel h3 { margin:0; padding:8px 10px; background:#f5f5f5; border-bottom:1px solid #ddd; font-size:14px; }
   #listPanel .row { padding:7px 10px; border-bottom:1px solid #eee; cursor:pointer; }
   #listPanel .row:hover { background:#fff7d6; }
   #listPanel .row b { color:#0b6e2f; }
   #listPanel .cnt { color:#888; font-size:12px; }
+  #listPanel .row.to { background:#fffdf0; }
+  #listPanel .row.to b { color:#b7791f; }
+  #statsPanel table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  #statsPanel th, #statsPanel td { padding:4px 6px; border-bottom:1px solid #eee; text-align:right; }
+  #statsPanel th { background:#fafafa; }
+  #statsPanel td:first-child, #statsPanel th:first-child { text-align:left; }
+  #statsPanel tr.total td { font-weight:bold; background:#fff7d6; }
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="tools">
-  <button id="btnList" title="Hiện/ẩn danh sách nhà đã vẽ">📋 Danh sách</button>
-  <button id="btnMoc" title="Bấm để bật/tắt: nhấp vào bản đồ đặt mốc">📌 Đặt mốc</button>
-  <button id="btnImport" title="Nạp file GeoJSON đã xuất trước đó">📂 Import</button>
-  <button id="btnClear" title="Xóa toàn bộ nhà + mốc đã vẽ">🗑 Xóa hết</button>
+  <button id="btnMode" title="Chuyển chế độ vẽ: nhà ↔ tổ">🏘 Vẽ nhà</button>
+  <button id="btnList" title="Hiện/ẩn danh sách">📋 Danh sách</button>
+  <button id="btnStats" title="Bảng thống kê theo tổ">📊 Thống kê</button>
+  <button id="btnMoc" title="Đặt mốc">📌 Đặt mốc</button>
+  <button id="btnImport" title="Nạp file GeoJSON">📂 Import</button>
+  <button id="btnClear" title="Xóa toàn bộ dữ liệu">🗑 Xóa hết</button>
   <button id="btnHelp">❓ Hướng dẫn</button>
+</div>
+<div id="filters">
+  <button id="fltSupport" title="Tô nổi hộ cần hỗ trợ">🆘 Cần hỗ trợ</button>
+  <button id="fltPolicy" class="blue" title="Tô nổi hộ chính sách">🚩 Chính sách</button>
+  <button id="fltCT" class="purple" title="Tô nổi công trình">🏗 Công trình</button>
 </div>
 <input type="file" id="fileImport" accept=".geojson,.json" style="display:none">
 <input id="searchBox" placeholder="🔍 Tìm kiếm (vd: nhà văn hóa, ĐH409...) — Enter">
-<div id="listPanel"><h3>🏠 Danh sách nhà</h3><div id="listBody"></div></div>
-<div id="bar"><b>Quản lý nhà – Thôn Lệ Sơn Nam + Lệ Sơn Bắc</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
+<div id="listPanel"><h3>📋 Danh sách tổ & nhà</h3><div id="listBody"></div></div>
+<div id="statsPanel"><h3>📊 Thống kê theo tổ</h3><div id="statsBody"></div></div>
+<div id="bar"><b>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam + Lệ Sơn Bắc</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
   con trỏ: <span class="c" id="coord">–</span></div>
 <div class="legend">
-  <i style="background:#00a651"></i> Nhà đã vẽ (màu xanh)<br>
+  <i style="background:#00a651"></i> Nhà ở<br>
+  <i style="background:#e74c3c"></i> Hộ cần hỗ trợ<br>
+  <i style="background:#2980b9"></i> Hộ chính sách<br>
+  <i style="background:#8e44ad"></i> Công trình<br>
+  <i style="background:#ffeaa7;border:1px solid #b7791f"></i> Ranh giới tổ<br>
   <i style="background:#ff4d4d;border-radius:50%"></i> Mốc thôn (Kiệt 1 / Kiệt 12)
 </div>
 <button id="exportBtn" class="leaflet-bar">⬇ Xuất GeoJSON</button>
@@ -99,75 +125,145 @@ const extentLayer = L.geoJSON(extent, {style: {color: '#e67e22', weight: 2, dash
 L.control.layers(
   {'Bản đồ OSM': osm, 'Vệ tinh (Esri)': esriSat, 'Vệ tinh + tên đường (Esri)': esriHybrid,
    'Google Maps (road)': googleRoad, 'Google Vệ tinh': googleSat, 'Google Hybrid': googleHybrid},
-  {'Đường OSM': roadLayer,
-   'Phạm vi ước tính': extentLayer, 'Mốc thôn': L.layerGroup([kiet1, kiet12])}
+  {'Đường OSM': roadLayer, 'Phạm vi ước tính': extentLayer, 'Mốc thôn': L.layerGroup([kiet1, kiet12])}
 ).addTo(map);
 
-// ================= VẼ NHÀ + THÔNG TIN HỘ =================
-const STORE_KEY = 'lesonnam_houses_v2';
-const drawn = L.featureGroup().addTo(map);
-const drawControl = new L.Control.Draw({
-  edit: {featureGroup: drawn},
-  draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#00a651'}}, rectangle: true,
-         polyline: false, circle: false, circlemarker: false, marker: false}
-});
-map.addControl(drawControl);
+// ================= DỮ LIỆU =================
+const STORE_KEY = 'lesonnam_household_v3';
+const drawn = L.featureGroup().addTo(map);      // nhà
+const totLayer = L.featureGroup().addTo(map);   // tổ
+const mocLayer = L.featureGroup().addTo(map);   // mốc
 let uid = 1;
 
 function props(l) { return (l.feature && l.feature.properties) || {}; }
 function esc(s) { return String(s == null ? '' : s).replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+function num(v) { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
 
-// Hiển thị chi tiết hộ khi nhấp vào nhà
+// ================= VẼ (nhà ↔ tổ) =================
+const houseDrawControl = new L.Control.Draw({
+  edit: {featureGroup: drawn},
+  draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#00a651'}}, rectangle: true,
+         polyline: false, circle: false, circlemarker: false, marker: false}
+});
+const toDrawControl = new L.Control.Draw({
+  edit: {featureGroup: totLayer},
+  draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#b7791f'}}, rectangle: true,
+         polyline: false, circle: false, circlemarker: false, marker: false}
+});
+let drawMode = 'house';
+map.addControl(houseDrawControl);
+const btnMode = document.getElementById('btnMode');
+btnMode.onclick = () => {
+  drawMode = (drawMode === 'house') ? 'to' : 'house';
+  map.removeControl(drawMode === 'house' ? toDrawControl : houseDrawControl);
+  map.addControl(drawMode === 'house' ? houseDrawControl : toDrawControl);
+  btnMode.textContent = drawMode === 'house' ? '🏘 Vẽ nhà' : '🏘 Vẽ tổ';
+  btnMode.classList.toggle('active', drawMode === 'to');
+};
+
+// ================= POPUP: NHÀ =================
 function houseInfo(l) {
   const p = props(l);
-  const c = l.getBounds().getCenter();
-  return '<div style="min-width:230px">' +
+  const flag = p.support === 'Có' ? ' 🆘' : (p.policy === 'Có' ? ' 🚩' : '');
+  return '<div style="min-width:240px">' +
     '<b>🏠 ' + (esc(p['addr:housenumber']) ? 'Số ' + esc(p['addr:housenumber']) + ' — ' : '') +
-      (esc(p.name) || 'Nhà chưa có tên') + '</b><br>' +
+      (esc(p.name) || 'Chưa có tên') + flag + '</b><br>' +
     '<table style="border-collapse:collapse;font-size:13px">' +
     '<tr><td style="padding:2px 8px 2px 0;color:#666">Chủ hộ</td><td><b>' + (esc(p.name) || '—') + '</b></td></tr>' +
     '<tr><td style="padding:2px 8px 2px 0;color:#666">Số nhà</td><td>' + (esc(p['addr:housenumber']) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Số thành viên</td><td>' + (esc(p.members) || '—') + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Nhân khẩu</td><td>' + (esc(p.members) || '—') + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Người cao tuổi</td><td>' + (esc(p.elderly) || '—') + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Trẻ em</td><td>' + (esc(p.children) || '—') + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Hộ chính sách</td><td>' + (esc(p.policy) || '—') + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Cần hỗ trợ</td><td>' + (esc(p.support) || '—') + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Loại</td><td>' + typeName(p.building) + '</td></tr>' +
     '<tr><td style="padding:2px 8px 2px 0;color:#666">Ghi chú</td><td>' + (esc(p.note) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Tọa độ</td><td>' + c.lat.toFixed(6) + ', ' + c.lng.toFixed(6) + '</td></tr>' +
     '</table>' +
     '<button onclick="editHouse(this)" style="margin-top:6px">✏️ Sửa</button> ' +
     '<button onclick="deleteHouse(this)">🗑 Xóa</button></div>';
 }
-
-// Form nhập / sửa thông tin hộ
+function typeName(b) {
+  if (!b || b === 'house') return 'Nhà ở';
+  if (b === 'community_centre') return 'Nhà văn hóa';
+  if (b === 'school') return 'Trường học';
+  if (b === 'religious') return 'Đình/chùa/miếu';
+  return 'Công trình';
+}
 function houseForm(l) {
   const p = props(l);
-  return '<div style="min-width:240px"><b>✏️ Thông tin hộ</b><br>' +
-    'Chủ hộ: <input id="fName" value="' + esc(p.name) + '" style="width:190px;margin:3px 0"><br>' +
-    'Số nhà: <input id="fNum" value="' + esc(p['addr:housenumber']) + '" style="width:190px;margin:3px 0"><br>' +
-    'Số thành viên: <input id="fMem" type="number" min="0" value="' + esc(p.members) + '" style="width:190px;margin:3px 0"><br>' +
-    'Ghi chú: <input id="fNote" value="' + esc(p.note) + '" style="width:190px;margin:3px 0"><br>' +
+  const sel = (v, o) => '<option value="' + o + '"' + (p[v] === o ? ' selected' : '') + '>' + o + '</option>';
+  return '<div style="min-width:250px"><b>✏️ Thông tin hộ</b><br>' +
+    'Chủ hộ: <input id="fName" value="' + esc(p.name) + '" style="width:200px;margin:3px 0"><br>' +
+    'Số nhà: <input id="fNum" value="' + esc(p['addr:housenumber']) + '" style="width:200px;margin:3px 0"><br>' +
+    'Nhân khẩu: <input id="fMem" type="number" min="0" value="' + esc(p.members) + '" style="width:200px;margin:3px 0"><br>' +
+    'Người cao tuổi: <input id="fEld" type="number" min="0" value="' + esc(p.elderly) + '" style="width:200px;margin:3px 0"><br>' +
+    'Trẻ em: <input id="fKid" type="number" min="0" value="' + esc(p.children) + '" style="width:200px;margin:3px 0"><br>' +
+    'Hộ chính sách: <select id="fPol" style="width:200px;margin:3px 0">' + sel('policy', 'Không') + sel('policy', 'Có') + '</select><br>' +
+    'Cần hỗ trợ: <select id="fSup" style="width:200px;margin:3px 0">' + sel('support', 'Không') + sel('support', 'Có') + '</select><br>' +
+    'Loại nhà: <select id="fType" style="width:200px;margin:3px 0">' +
+    '<option value="house"' + ((!p.building || p.building === 'house') ? ' selected' : '') + '>Nhà ở</option>' +
+    '<option value="community_centre"' + (p.building === 'community_centre' ? ' selected' : '') + '>Nhà văn hóa</option>' +
+    '<option value="school"' + (p.building === 'school' ? ' selected' : '') + '>Trường học</option>' +
+    '<option value="religious"' + (p.building === 'religious' ? ' selected' : '') + '>Đình/chùa/miếu</option>' +
+    '<option value="yes"' + (p.building === 'yes' ? ' selected' : '') + '>Công trình khác</option></select><br>' +
+    'Ghi chú: <input id="fNote" value="' + esc(p.note) + '" style="width:200px;margin:3px 0"><br>' +
     '<button onclick="saveHouse(this)">💾 Lưu</button> ' +
     '<button onclick="cancelEdit(this)">Hủy</button></div>';
 }
 
+// ================= POPUP: TỔ (tổng hợp) =================
+function pointInRing(p, ring) {
+  const x = p.lat, y = p.lng;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i].lat, yi = ring[i].lng;
+    const xj = ring[j].lat, yj = ring[j].lng;
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function totStats(l) {
+  const ring = l.getLatLngs()[0];
+  const s = {to: 0, mem: 0, eld: 0, kid: 0, pol: 0, sup: 0, ct: 0};
+  drawn.eachLayer(h => {
+    if (!pointInRing(h.getBounds().getCenter(), ring)) return;
+    const p = props(h);
+    s.to++; s.mem += num(p.members); s.eld += num(p.elderly); s.kid += num(p.children);
+    if (p.policy === 'Có') s.pol++;
+    if (p.support === 'Có') s.sup++;
+    if (p.building && p.building !== 'house') s.ct++;
+  });
+  return s;
+}
+function toInfo(l) {
+  const p = props(l);
+  const s = totStats(l);
+  return '<div style="min-width:230px"><b>🏘 ' + esc(p.name || 'Tổ') + '</b><br>' +
+    '<table style="border-collapse:collapse;font-size:13px">' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Số hộ</td><td><b>' + s.to + '</b></td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Nhân khẩu</td><td><b>' + s.mem + '</b></td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Người cao tuổi</td><td>' + s.eld + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Trẻ em</td><td>' + s.kid + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Hộ chính sách</td><td>' + s.pol + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Hộ cần hỗ trợ</td><td>' + s.sup + '</td></tr>' +
+    '<tr><td style="padding:2px 8px 2px 0;color:#666">Công trình</td><td>' + s.ct + '</td></tr>' +
+    '</table>' +
+    '<button onclick="renameTo(this)" style="margin-top:6px">✏️ Đổi tên</button> ' +
+    '<button onclick="deleteTo(this)">🗑 Xóa tổ</button></div>';
+}
+
+// ================= THAO TÁC =================
 function findLayer(el) {
   const pop = el.closest('.leaflet-popup');
   let layer = null;
   drawn.eachLayer(l => { if (l.getPopup() && l.getPopup().getElement() === pop) layer = l; });
   return layer;
 }
-
-window.editHouse = function(btn) {
-  const l = findLayer(btn);
-  if (l) l.setPopupContent(houseForm(l));
-};
-window.cancelEdit = function(btn) {
-  const l = findLayer(btn);
-  if (l) l.setPopupContent(houseInfo(l));
-};
+window.editHouse = function(btn) { const l = findLayer(btn); if (l) l.setPopupContent(houseForm(l)); };
+window.cancelEdit = function(btn) { const l = findLayer(btn); if (l) l.setPopupContent(houseInfo(l)); };
 window.deleteHouse = function(btn) {
   const l = findLayer(btn);
-  if (l && confirm('Xóa nhà này?')) {
-    drawn.removeLayer(l);
-    saveState();
-  }
+  if (l && confirm('Xóa nhà này?')) { drawn.removeLayer(l); saveState(); }
 };
 window.saveHouse = function(btn) {
   const l = findLayer(btn);
@@ -176,24 +272,79 @@ window.saveHouse = function(btn) {
   p.name = document.getElementById('fName').value.trim();
   p['addr:housenumber'] = document.getElementById('fNum').value.trim();
   p.members = document.getElementById('fMem').value.trim();
+  p.elderly = document.getElementById('fEld').value.trim();
+  p.children = document.getElementById('fKid').value.trim();
+  p.policy = document.getElementById('fPol').value;
+  p.support = document.getElementById('fSup').value;
+  p.building = document.getElementById('fType').value;
   p.note = document.getElementById('fNote').value.trim();
   l.setPopupContent(houseInfo(l));
   saveState();
 };
+function findToLayer(el) {
+  const pop = el.closest('.leaflet-popup');
+  let l = null;
+  totLayer.eachLayer(t => { if (t.getPopup() && t.getPopup().getElement() === pop) l = t; });
+  return l;
+}
+window.renameTo = function(btn) {
+  const l = findToLayer(btn);
+  if (!l) return;
+  const name = prompt('Tên tổ:', props(l).name || 'Tổ');
+  if (name === null) return;
+  props(l).name = name;
+  l.setPopupContent(toInfo(l));
+  saveState();
+};
+window.deleteTo = function(btn) {
+  const l = findToLayer(btn);
+  if (l && confirm('Xóa ranh giới tổ này?')) { totLayer.removeLayer(l); saveState(); }
+};
 
+// ---- Sự kiện vẽ ----
 map.on(L.Draw.Event.CREATED, e => {
   const layer = e.layer;
-  layer.feature = {type: 'Feature', properties: {building: 'house', name: '', 'addr:housenumber': '', members: '', note: ''}};
-  layer.uid = uid++;
-  layer.bindPopup(function(l) { return houseInfo(l); });
-  drawn.addLayer(layer);
-  layer.openPopup();
+  if (drawMode === 'to') {
+    const name = prompt('Tên tổ (vd: Tổ 1, Tổ 2, Khu dân cư...):', 'Tổ ' + (totLayer.getLayers().length + 1));
+    layer.feature = {type: 'Feature', properties: {name: (name || 'Tổ'), type: 'to', note: ''}};
+    layer.uid = uid++;
+    layer.setStyle({color: '#b7791f', weight: 2, fillColor: '#ffeaa7', fillOpacity: .25});
+    layer.bindPopup(function(l) { return toInfo(l); });
+    totLayer.addLayer(layer);
+  } else {
+    layer.feature = {type: 'Feature', properties: {building: 'house', name: '', 'addr:housenumber': '',
+      members: '', elderly: '', children: '', policy: 'Không', support: 'Không', note: ''}};
+    layer.uid = uid++;
+    layer.bindPopup(function(l) { return houseInfo(l); });
+    drawn.addLayer(layer);
+    layer.openPopup();
+  }
   saveState();
 });
 map.on(L.Draw.Event.EDITED, saveState);
 map.on(L.Draw.Event.DELETED, saveState);
 
-// ================= LƯU / KHÔI PHỤC (localStorage) =================
+// ================= BỘ LỌC =================
+let fSup = false, fPol = false, fCT = false;
+function applyFilters() {
+  drawn.eachLayer(l => {
+    const p = props(l);
+    const isCT = !!(p.building && p.building !== 'house');
+    const isSup = p.support === 'Có';
+    const isPol = p.policy === 'Có';
+    let color = isCT ? '#8e44ad' : (isSup ? '#e74c3c' : (isPol ? '#2980b9' : '#00a651'));
+    let dim = false;
+    if (fSup && !isSup) dim = true;
+    if (fPol && !isPol) dim = true;
+    if (fCT && !isCT) dim = true;
+    l.setStyle({color: color, weight: dim ? 1 : 2, fillColor: color, fillOpacity: dim ? .06 : .5, opacity: dim ? .35 : 1});
+  });
+}
+document.getElementById('fltSupport').onclick = function() { fSup = !fSup; this.classList.toggle('active', fSup); applyFilters(); };
+document.getElementById('fltPolicy').onclick = function() { fPol = !fPol; this.classList.toggle('active', fPol); applyFilters(); };
+document.getElementById('fltCT').onclick = function() { fCT = !fCT; this.classList.toggle('active', fCT); applyFilters(); };
+
+// ================= LƯU / KHÔI PHỤC =================
 function addFeature(f) {
   if (f.geometry.type === 'Point') {
     const [lon, lat] = f.geometry.coordinates;
@@ -201,24 +352,40 @@ function addFeature(f) {
       .addTo(mocLayer).bindPopup(mocPopup);
     m.feature = {type: 'Feature', properties: f.properties, geometry: null};
     m.name = (f.properties && f.properties.name) || 'Mốc';
+    return;
+  }
+  const l = L.geoJSON(f).getLayers()[0];
+  l.feature = f;
+  l.uid = uid++;
+  if (f.properties && f.properties.type === 'to') {
+    l.setStyle({color: '#b7791f', weight: 2, fillColor: '#ffeaa7', fillOpacity: .25});
+    l.bindPopup(function(l) { return toInfo(l); });
+    totLayer.addLayer(l);
   } else {
-    const l = L.geoJSON(f).getLayers()[0];
-    l.feature = f;
-    l.uid = uid++;
     l.bindPopup(function(l) { return houseInfo(l); });
     drawn.addLayer(l);
   }
 }
 function collectAll() {
   const features = [];
+  totLayer.eachLayer(t => {
+    const g = t.toGeoJSON();
+    const p = props(t);
+    g.properties = Object.assign({}, g.properties, {type: 'to', name: p.name || 'Tổ', note: p.note || 'Ranh giới tổ dân cư (vẽ tay)'});
+    features.push(g);
+  });
   drawn.eachLayer(l => {
     const g = l.toGeoJSON();
     const p = props(l);
     g.properties = Object.assign({}, g.properties, {
-      building: 'house',
+      building: p.building || 'house',
       name: p.name || undefined,
       'addr:housenumber': p['addr:housenumber'] || undefined,
       members: p.members || undefined,
+      elderly: p.elderly || undefined,
+      children: p.children || undefined,
+      policy: p.policy === 'Có' ? 'yes' : 'no',
+      support: p.support === 'Có' ? 'yes' : 'no',
       note: p.note || undefined,
       source: 'vẽ tay từ ảnh vệ tinh – thôn Lệ Sơn Nam'
     });
@@ -235,6 +402,8 @@ function collectAll() {
 function saveState() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(collectAll())); } catch (e) {}
   refreshList();
+  refreshStats();
+  applyFilters();
 }
 function restoreState() {
   let features = [];
@@ -242,32 +411,30 @@ function restoreState() {
   features.forEach(addFeature);
 }
 
-// ================= DANH SÁCH NHÀ =================
+// ================= DANH SÁCH =================
 function refreshList() {
   const body = document.getElementById('listBody');
   const rows = [];
+  totLayer.eachLayer(t => {
+    const p = props(t);
+    rows.push({uid: t.uid, kind: 'to', label: '🏘 ' + (p.name || 'Tổ'), detail: ''});
+  });
   drawn.eachLayer(l => {
     const p = props(l);
-    const num = p['addr:housenumber'] || '';
-    const name = p.name || '(chưa có tên)';
-    const mem = p.members ? ' · ' + p.members + ' người' : '';
-    rows.push({uid: l.uid, num: num, name: name, mem: mem});
+    const flag = p.support === 'Có' ? ' 🆘' : (p.policy === 'Có' ? ' 🚩' : '');
+    const numS = p['addr:housenumber'] ? 'Số ' + p['addr:housenumber'] + ' — ' : '';
+    rows.push({uid: l.uid, kind: 'house', label: numS + (p.name || 'Nhà') + flag,
+      detail: p.members ? ' · ' + p.members + ' người' : ''});
   });
-  rows.sort((a, b) => (a.num || 'ZZZ').localeCompare(b.num || 'ZZZ', 'vi'));
   body.innerHTML = rows.map(r =>
-    '<div class="row" onclick="gotoHouse(' + r.uid + ')">' +
-    '<b>' + (r.num ? 'Số ' + r.num : 'Nhà') + '</b> — ' + r.name +
-    '<span class="cnt">' + r.mem + '</span></div>').join('') ||
-    '<div class="row" style="color:#888">Chưa có nhà nào. Vẽ nhà bằng công cụ ▢ / polygon ở cột trái.</div>';
+    '<div class="row ' + (r.kind === 'to' ? 'to' : '') + '" onclick="gotoItem(' + r.uid + ')">' +
+    '<b>' + r.label + '</b><span class="cnt">' + r.detail + '</span></div>').join('') ||
+    '<div class="row" style="color:#888">Chưa có dữ liệu. Vẽ nhà / vẽ tổ trên bản đồ.</div>';
   document.getElementById('btnList').textContent = '📋 Danh sách (' + rows.length + ')';
 }
-window.gotoHouse = function(uid) {
-  drawn.eachLayer(l => {
-    if (l.uid === uid) {
-      map.flyTo(l.getBounds().getCenter(), 19);
-      l.openPopup();
-    }
-  });
+window.gotoItem = function(uid) {
+  totLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); t.openPopup(); } });
+  drawn.eachLayer(l => { if (l.uid === uid) { map.flyTo(l.getBounds().getCenter(), 19); l.openPopup(); } });
 };
 document.getElementById('btnList').onclick = () => {
   const p = document.getElementById('listPanel');
@@ -275,8 +442,46 @@ document.getElementById('btnList').onclick = () => {
   refreshList();
 };
 
+// ================= THỐNG KÊ =================
+function refreshStats() {
+  const rows = [];
+  const tot = {name: 'Tổng toàn thôn', to: 0, mem: 0, eld: 0, kid: 0, pol: 0, sup: 0, ct: 0};
+  totLayer.eachLayer(t => {
+    const s = totStats(t);
+    rows.push({name: props(t).name || 'Tổ', to: s.to, mem: s.mem, eld: s.eld, kid: s.kid, pol: s.pol, sup: s.sup, ct: s.ct});
+    tot.to += s.to; tot.mem += s.mem; tot.eld += s.eld; tot.kid += s.kid;
+    tot.pol += s.pol; tot.sup += s.sup; tot.ct += s.ct;
+  });
+  // nhà ngoài tổ
+  const out = {to: 0, mem: 0, eld: 0, kid: 0, pol: 0, sup: 0, ct: 0};
+  drawn.eachLayer(h => {
+    const c = h.getBounds().getCenter();
+    let inTo = false;
+    totLayer.eachLayer(t => { if (pointInRing(c, t.getLatLngs()[0])) inTo = true; });
+    if (inTo) return;
+    const p = props(h);
+    out.to++; out.mem += num(p.members); out.eld += num(p.elderly); out.kid += num(p.children);
+    if (p.policy === 'Có') out.pol++;
+    if (p.support === 'Có') out.sup++;
+    if (p.building && p.building !== 'house') out.ct++;
+  });
+  if (out.to > 0) rows.push({name: 'Chưa phân tổ', to: out.to, mem: out.mem, eld: out.eld, kid: out.kid, pol: out.pol, sup: out.sup, ct: out.ct});
+  tot.to += out.to; tot.mem += out.mem; tot.eld += out.eld; tot.kid += out.kid;
+  tot.pol += out.pol; tot.sup += out.sup; tot.ct += out.ct;
+
+  const tr = r => '<tr><td>' + r.name + '</td><td>' + r.to + '</td><td>' + r.mem + '</td><td>' + r.eld + '</td><td>' + r.kid + '</td><td>' + r.pol + '</td><td>' + r.sup + '</td><td>' + r.ct + '</td></tr>';
+  document.getElementById('statsBody').innerHTML =
+    '<table><tr><th>Tổ</th><th>Số hộ</th><th>Nhân khẩu</th><th>NCT</th><th>Trẻ em</th><th>Chính sách</th><th>Cần hỗ trợ</th><th>Công trình</th></tr>' +
+    rows.map(tr).join('') +
+    '<tr class="total">' + tr(tot).replace('<tr>', '').replace('</tr>', '') + '</tr></table>';
+}
+document.getElementById('btnStats').onclick = () => {
+  const p = document.getElementById('statsPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  refreshStats();
+};
+
 // ================= ĐẶT MỐC =================
-const mocLayer = L.featureGroup().addTo(map);
 let mocMode = false;
 const btnMoc = document.getElementById('btnMoc');
 btnMoc.onclick = () => {
@@ -313,7 +518,7 @@ document.getElementById('searchBox').addEventListener('keydown', ev => {
   fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q + ' Hòa Tiến Hòa Vang Đà Nẵng'), {headers: {Accept: 'application/json'}})
     .then(r => r.json())
     .then(res => {
-      if (!res.length) { alert('Không tìm thấy. Thử từ khóa khác (vd: ĐH409, nhà thuốc...).'); return; }
+      if (!res.length) { alert('Không tìm thấy.'); return; }
       map.flyTo([parseFloat(res[0].lat), parseFloat(res[0].lon)], 17);
       L.popup().setLatLng([res[0].lat, res[0].lon]).setContent('<b>' + res[0].display_name + '</b>').openOn(map);
     })
@@ -321,16 +526,16 @@ document.getElementById('searchBox').addEventListener('keydown', ev => {
 });
 
 // ================= HƯỚNG DẪN =================
-document.getElementById('btnHelp').onclick = () => alert("1) Lớp nền: chọn \"Google Vệ tinh\" / \"Google Hybrid\" ở góc phải trên để thấy rõ từng mái nhà.\n2) VẼ NHÀ: chọn công cụ ▢ (hình chữ nhật) hoặc đa giác ở cột trái, khoanh theo mái nhà trên ảnh.\n   Sau khi vẽ xong, hộp thoại hiện ra → điền thông tin hộ (chủ hộ, số nhà, thành viên, ghi chú) → Lưu.\n3) XEM/SỬA: nhấp vào nhà đã vẽ → hiện thông tin hộ; bấm ✏️ Sửa để đổi, 🗑 Xóa để bỏ.\n4) 📋 Danh sách nhà: bấm nút để xem bảng tổng hợp, nhấp hàng để nhảy tới nhà đó.\n5) Đặt mốc: 📌 Đặt mốc → nhấp bản đồ → gõ tên (vd: Nhà Văn Hóa Thôn Lệ Sơn Nam).\n6) Xong bấm ⬇ Xuất GeoJSON để tải dữ liệu (JOSM / iD / app riêng).\n\nMọi thay đổi tự lưu vào trình duyệt — reload không mất dữ liệu.");
+document.getElementById('btnHelp').onclick = () => alert("1) Lớp nền: chọn \"Google Vệ tinh\" / \"Google Hybrid\" để thấy rõ mái nhà.\n2) VẼ NHÀ: bấm 🏘 Vẽ nhà → chọn ▢/đa giác ở cột trái → khoanh mái nhà → điền thông tin hộ → Lưu.\n3) VẼ TỔ: bấm 🏘 Vẽ tổ → vẽ ranh giới tổ/khu dân cư → gõ tên (Tổ 1, Tổ 2...).\n   Click vào tổ → hiện bảng tổng hợp: số hộ, nhân khẩu, NCT, trẻ em, hộ chính sách, hộ cần hỗ trợ.\n4) CLICK NHÀ: hiện chi tiết hộ → ✏️ Sửa / 🗑 Xóa.\n5) 📊 Thống kê: bảng tổng hợp toàn thôn theo tổ.\n6) BỘ LỌC: bấm các nút lọc (Cần hỗ trợ / Chính sách / Công trình) để tô màu nổi bật hộ tương ứng.\n7) 📋 Danh sách: xem tổ + nhà, nhấp để nhảy tới.\n8) ⬇ Xuất GeoJSON để tải dữ liệu (JOSM / iD / app riêng).\n\nMọi thay đổi tự lưu — reload không mất dữ liệu.");
 
 // ================= XUẤT =================
 document.getElementById('exportBtn').onclick = () => {
   const features = collectAll();
-  if (!features.length) { alert('Chưa có gì để xuất (vẽ nhà hoặc đặt mốc trước).'); return; }
+  if (!features.length) { alert('Chưa có gì để xuất.'); return; }
   const fc = {type: 'FeatureCollection', features: features};
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(fc, null, 2)], {type: 'application/geo+json'}));
-  a.download = 'le-son-nam-houses.geojson';
+  a.download = 'le-son-nam-data.geojson';
   a.click();
 };
 
@@ -345,7 +550,13 @@ document.getElementById('fileImport').addEventListener('change', ev => {
       const data = JSON.parse(reader.result);
       const feats = data.features || (data.type === 'Feature' ? [data] : []);
       if (!feats.length) { alert('File không có đối tượng nào.'); return; }
-      feats.forEach(addFeature);
+      feats.forEach(f => {
+        if (f.properties) {
+          if (f.properties.policy === 'yes') f.properties.policy = 'Có';
+          if (f.properties.support === 'yes') f.properties.support = 'Có';
+        }
+        addFeature(f);
+      });
       saveState();
       alert('Đã import ' + feats.length + ' đối tượng.');
     } catch (e) { alert('File GeoJSON không hợp lệ: ' + e.message); }
@@ -356,8 +567,9 @@ document.getElementById('fileImport').addEventListener('change', ev => {
 
 // ================= XÓA HẾT =================
 document.getElementById('btnClear').onclick = () => {
-  if (!confirm('Xóa toàn bộ nhà + mốc đã vẽ? (không thể hoàn tác)')) return;
+  if (!confirm('Xóa toàn bộ nhà + tổ + mốc? (không thể hoàn tác)')) return;
   drawn.clearLayers();
+  totLayer.clearLayers();
   mocLayer.clearLayers();
   saveState();
 };
@@ -365,6 +577,8 @@ document.getElementById('btnClear').onclick = () => {
 // ================= KHỞI TẠO =================
 restoreState();
 refreshList();
+refreshStats();
+applyFilters();
 map.on('mousemove', e => {
   document.getElementById('coord').textContent = e.latlng.lat.toFixed(6) + ', ' + e.latlng.lng.toFixed(6);
 });
