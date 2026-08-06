@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+ai/tiles/
+ai/wheels/
+ai/*.pth
+ai/diag.py
+ai/diag2.py
+/tmp/
