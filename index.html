@@ -7,55 +7,117 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
 <style>
-  html, body, #map { height: 100%; margin: 0; }
-  #bar { position: absolute; z-index: 1000; bottom: 0; left: 0; right: 0;
-         background: rgba(0,0,0,.78); color: #fff; font: 12px/1.6 monospace; padding: 4px 10px; }
-  #bar b { color: #ffd75e; }
-  #bar .c { color: #9be89b; }
-  #exportBtn { position: absolute; z-index: 1000; top: 10px; right: 10px; }
-  .legend { position:absolute; z-index:1000; bottom:34px; right:10px; background:rgba(255,255,255,.92);
-            padding:8px 10px; font:12px sans-serif; border-radius:4px; box-shadow:0 1px 5px rgba(0,0,0,.4);}
-  .legend i { display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-1px; }
-  #tools { position:absolute; z-index:1000; top:10px; left:52px; display:flex; gap:6px; flex-wrap:wrap; max-width:620px; }
-  #tools button { background:#fff; border:1px solid #ccc; border-radius:4px; padding:6px 10px;
-                  font:13px sans-serif; cursor:pointer; box-shadow:0 1px 5px rgba(0,0,0,.4); }
-  #tools button.active { background:#ffd75e; border-color:#e67e22; }
-  #filters { position:absolute; z-index:1000; top:64px; left:52px; display:flex; gap:6px; }
-  #filters button { background:#fff; border:1px solid #ccc; border-radius:4px; padding:5px 10px;
-                    font:12.5px sans-serif; cursor:pointer; box-shadow:0 1px 5px rgba(0,0,0,.35); }
-  #filters button.active { background:#ff9d9d; border-color:#e74c3c; }
-  #filters button.active.blue { background:#aed6f1; border-color:#2980b9; }
-  #filters button.active.purple { background:#d7b8ef; border-color:#8e44ad; }
-  #searchBox { position:absolute; z-index:1000; top:100px; left:52px; width:280px;
-               font:13px sans-serif; padding:6px 8px; border:1px solid #ccc; border-radius:4px;
-               box-shadow:0 1px 5px rgba(0,0,0,.4); }
-  #listPanel, #statsPanel { position:absolute; z-index:1000; top:135px; left:52px; width:350px; max-height:60%;
-               background:#fff; border:1px solid #ccc; border-radius:6px; box-shadow:0 2px 10px rgba(0,0,0,.35);
-               display:none; overflow-y:auto; font:13px sans-serif; }
-  #statsPanel { left:415px; }
-  #listPanel h3, #statsPanel h3 { margin:0; padding:8px 10px; background:#f5f5f5; border-bottom:1px solid #ddd; font-size:14px; }
-  #listPanel .row { padding:7px 10px; border-bottom:1px solid #eee; cursor:pointer; }
-  #listPanel .row:hover { background:#fff7d6; }
-  #listPanel .row b { color:#0b6e2f; }
-  #listPanel .cnt { color:#888; font-size:12px; }
-  #listPanel .row.to { background:#fffdf0; }
-  #listPanel .row.to b { color:#b7791f; }
+  :root {
+    --primary:#16a34a; --accent:#f59e0b; --danger:#dc2626; --blue:#2563eb;
+    --purple:#7c3aed; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --card:#ffffff; --shadow:0 6px 24px rgba(17,24,39,.14);
+    --radius:14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height:100%; margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; color:var(--text); }
+  #map { height:100%; }
+  /* thanh trạng thái */
+  #bar { position:absolute; z-index:1000; bottom:0; left:0; right:0;
+         background:linear-gradient(90deg,#14532d,#166534 55%,#15803d);
+         color:#eafff1; font:12px/1.7 system-ui; padding:5px 14px; display:flex; gap:14px;
+         box-shadow:0 -2px 10px rgba(0,0,0,.2); align-items:center; flex-wrap:wrap; }
+  #bar b { color:#fde68a; }
+  #bar .c { color:#bbf7d0; font-family:ui-monospace,Menlo,monospace; }
+  #bar .chip { background:rgba(255,255,255,.14); border-radius:999px; padding:1px 10px; font-size:11px; }
+  /* nút xuất */
+  #exportBtn { position:absolute; z-index:1000; top:12px; right:12px;
+               background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border:none;
+               border-radius:10px; padding:9px 14px; font:600 13px system-ui; cursor:pointer;
+               box-shadow:0 4px 12px rgba(22,163,74,.35); transition:transform .12s; }
+  #exportBtn:hover { transform:translateY(-1px); }
+  /* thanh công cụ */
+  #tools { position:absolute; z-index:1000; top:12px; left:56px; display:flex; align-items:center;
+           gap:2px; flex-wrap:wrap; max-width:700px;
+           background:rgba(255,255,255,.94); border:1px solid var(--line); border-radius:var(--radius);
+           padding:5px 6px; box-shadow:var(--shadow); backdrop-filter:blur(8px); }
+  #tools .sep { width:1px; height:22px; background:var(--line); margin:0 4px; }
+  #tools button { border:none; background:transparent; padding:7px 11px; border-radius:9px;
+                  font:600 13px system-ui; color:var(--text); cursor:pointer; white-space:nowrap;
+                  transition:background .15s,color .15s; }
+  #tools button:hover { background:#f0fdf4; }
+  #tools button.active { background:#dcfce7; color:#166534; box-shadow:inset 0 0 0 1px #86efac; }
+  #tools button.danger:hover { background:#fef2f2; color:var(--danger); }
+  /* bộ lọc */
+  #filters { position:absolute; z-index:1000; top:66px; left:56px; display:flex; gap:8px;
+             background:rgba(255,255,255,.9); border:1px solid var(--line); border-radius:999px;
+             padding:5px 8px; box-shadow:var(--shadow); backdrop-filter:blur(8px); }
+  #filters button { border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:4px 12px;
+                    font:600 12.5px system-ui; cursor:pointer; transition:all .15s; }
+  #filters button:hover { border-color:#fca5a5; }
+  #filters button.active { background:#fee2e2; border-color:var(--danger); color:#991b1b; }
+  #filters button.active.blue { background:#dbeafe; border-color:var(--blue); color:#1e40af; }
+  #filters button.active.purple { background:#f3e8ff; border-color:var(--purple); color:#6b21a8; }
+  /* ô tìm kiếm */
+  #searchBox { position:absolute; z-index:1000; top:108px; left:56px; width:300px;
+               font:13px system-ui; padding:9px 12px; border:1px solid var(--line); border-radius:12px;
+               box-shadow:var(--shadow); outline:none; transition:border .15s; }
+  #searchBox:focus { border-color:var(--primary); }
+  /* bảng danh sách + thống kê */
+  #listPanel, #statsPanel { position:absolute; z-index:1000; top:150px; left:56px; width:360px; max-height:62%;
+               background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+               box-shadow:var(--shadow); display:none; overflow-y:auto; font:13px system-ui; }
+  #statsPanel { left:428px; }
+  #listPanel h3, #statsPanel h3 { position:sticky; top:0; margin:0; padding:10px 14px;
+               background:#f9fafb; border-bottom:1px solid var(--line); font-size:14px; font-weight:700; }
+  #listPanel .row { padding:8px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer;
+                    display:flex; justify-content:space-between; gap:8px; transition:background .12s; }
+  #listPanel .row:hover { background:#f0fdf4; }
+  #listPanel .row b { color:var(--primary); font-weight:600; }
+  #listPanel .cnt { color:var(--muted); font-size:12px; white-space:nowrap; }
+  #listPanel .row.to { background:#fffbeb; }
+  #listPanel .row.to b { color:#b45309; }
+  #listPanel .row.to:hover { background:#fef3c7; }
   #statsPanel table { width:100%; border-collapse:collapse; font-size:12.5px; }
-  #statsPanel th, #statsPanel td { padding:4px 6px; border-bottom:1px solid #eee; text-align:right; }
-  #statsPanel th { background:#fafafa; }
-  #statsPanel td:first-child, #statsPanel th:first-child { text-align:left; }
-  #statsPanel tr.total td { font-weight:bold; background:#fff7d6; }
+  #statsPanel th { position:sticky; top:39px; background:#f9fafb; }
+  #statsPanel th, #statsPanel td { padding:5px 6px; border-bottom:1px solid #f3f4f6; text-align:right; }
+  #statsPanel td:first-child, #statsPanel th:first-child { text-align:left; font-weight:600; }
+  #statsPanel tr.total td { font-weight:800; background:#fef3c7; }
+  #statsPanel tr:hover td { background:#f9fafb; }
+  /* chú giải */
+  .legend { position:absolute; z-index:1000; bottom:44px; right:12px; background:rgba(255,255,255,.94);
+            padding:10px 14px; font:12.5px system-ui; border-radius:var(--radius); box-shadow:var(--shadow);
+            border:1px solid var(--line); line-height:1.9; }
+  .legend i { display:inline-block; width:13px; height:13px; margin-right:7px; vertical-align:-2px;
+              border-radius:3px; }
+  /* popup */
+  .leaflet-popup-content-wrapper { border-radius:12px; box-shadow:var(--shadow); }
+  .leaflet-popup-content { font:13px system-ui; color:var(--text); margin:12px 14px; }
+  .leaflet-popup-content b { color:var(--text); }
+  .leaflet-popup-content .pt { font-weight:800; font-size:14px; display:block; margin-bottom:6px; }
+  .info-table { border-collapse:collapse; font-size:13px; margin:4px 0 8px; width:100%; }
+  .info-table td { padding:3px 14px 3px 0; color:var(--muted); }
+  .info-table td:last-child { color:var(--text); font-weight:600; text-align:right; }
+  .leaflet-popup-content button { background:#f3f4f6; border:1px solid #d1d5db; border-radius:8px;
+                  padding:5px 12px; margin:6px 4px 0 0; cursor:pointer; font:600 12.5px system-ui;
+                  color:var(--text); transition:background .15s; }
+  .leaflet-popup-content button:hover { background:#e5e7eb; }
+  .leaflet-popup-content button.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .leaflet-popup-content button.primary:hover { background:#15803d; }
+  .leaflet-popup-content input, .leaflet-popup-content select {
+                  border:1px solid #d1d5db; border-radius:7px; padding:5px 7px; font:13px system-ui;
+                  outline:none; margin:2px 0; }
+  .leaflet-popup-content input:focus, .leaflet-popup-content select:focus { border-color:var(--primary); }
+  ::-webkit-scrollbar { width:9px; height:9px; }
+  ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover { background:#9ca3af; }
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="tools">
   <button id="btnMode" title="Chuyển chế độ vẽ: nhà ↔ tổ">🏘 Vẽ nhà</button>
+  <span class="sep"></span>
   <button id="btnList" title="Hiện/ẩn danh sách">📋 Danh sách</button>
   <button id="btnStats" title="Bảng thống kê theo tổ">📊 Thống kê</button>
+  <span class="sep"></span>
   <button id="btnMoc" title="Đặt mốc">📌 Đặt mốc</button>
   <button id="btnImport" title="Nạp file GeoJSON">📂 Import</button>
-  <button id="btnClear" title="Xóa toàn bộ dữ liệu">🗑 Xóa hết</button>
+  <button id="btnClear" class="danger" title="Xóa toàn bộ dữ liệu">🗑 Xóa hết</button>
   <button id="btnHelp">❓ Hướng dẫn</button>
 </div>
 <div id="filters">
@@ -166,20 +228,20 @@ function houseInfo(l) {
   const p = props(l);
   const flag = p.support === 'Có' ? ' 🆘' : (p.policy === 'Có' ? ' 🚩' : '');
   return '<div style="min-width:240px">' +
-    '<b>🏠 ' + (esc(p['addr:housenumber']) ? 'Số ' + esc(p['addr:housenumber']) + ' — ' : '') +
-      (esc(p.name) || 'Chưa có tên') + flag + '</b><br>' +
-    '<table style="border-collapse:collapse;font-size:13px">' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Chủ hộ</td><td><b>' + (esc(p.name) || '—') + '</b></td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Số nhà</td><td>' + (esc(p['addr:housenumber']) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Nhân khẩu</td><td>' + (esc(p.members) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Người cao tuổi</td><td>' + (esc(p.elderly) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Trẻ em</td><td>' + (esc(p.children) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Hộ chính sách</td><td>' + (esc(p.policy) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Cần hỗ trợ</td><td>' + (esc(p.support) || '—') + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Loại</td><td>' + typeName(p.building) + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Ghi chú</td><td>' + (esc(p.note) || '—') + '</td></tr>' +
+    '<span class="pt">🏠 ' + (esc(p['addr:housenumber']) ? 'Số ' + esc(p['addr:housenumber']) + ' — ' : '') +
+      (esc(p.name) || 'Chưa có tên') + flag + '</span>' +
+    '<table class="info-table">' +
+    '<tr><td>Chủ hộ</td><td><b>' + (esc(p.name) || '—') + '</b></td></tr>' +
+    '<tr><td>Số nhà</td><td>' + (esc(p['addr:housenumber']) || '—') + '</td></tr>' +
+    '<tr><td>Nhân khẩu</td><td>' + (esc(p.members) || '—') + '</td></tr>' +
+    '<tr><td>Người cao tuổi</td><td>' + (esc(p.elderly) || '—') + '</td></tr>' +
+    '<tr><td>Trẻ em</td><td>' + (esc(p.children) || '—') + '</td></tr>' +
+    '<tr><td>Hộ chính sách</td><td>' + (esc(p.policy) || '—') + '</td></tr>' +
+    '<tr><td>Cần hỗ trợ</td><td>' + (esc(p.support) || '—') + '</td></tr>' +
+    '<tr><td>Loại</td><td>' + typeName(p.building) + '</td></tr>' +
+    '<tr><td>Ghi chú</td><td>' + (esc(p.note) || '—') + '</td></tr>' +
     '</table>' +
-    '<button onclick="editHouse(this)" style="margin-top:6px">✏️ Sửa</button> ' +
+    '<button class="primary" onclick="editHouse(this)">✏️ Sửa</button> ' +
     '<button onclick="deleteHouse(this)">🗑 Xóa</button></div>';
 }
 function typeName(b) {
@@ -207,7 +269,7 @@ function houseForm(l) {
     '<option value="religious"' + (p.building === 'religious' ? ' selected' : '') + '>Đình/chùa/miếu</option>' +
     '<option value="yes"' + (p.building === 'yes' ? ' selected' : '') + '>Công trình khác</option></select><br>' +
     'Ghi chú: <input id="fNote" value="' + esc(p.note) + '" style="width:200px;margin:3px 0"><br>' +
-    '<button onclick="saveHouse(this)">💾 Lưu</button> ' +
+    '<button class="primary" onclick="saveHouse(this)">💾 Lưu</button> ' +
     '<button onclick="cancelEdit(this)">Hủy</button></div>';
 }
 
@@ -238,17 +300,18 @@ function totStats(l) {
 function toInfo(l) {
   const p = props(l);
   const s = totStats(l);
-  return '<div style="min-width:230px"><b>🏘 ' + esc(p.name || 'Tổ') + '</b><br>' +
-    '<table style="border-collapse:collapse;font-size:13px">' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Số hộ</td><td><b>' + s.to + '</b></td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Nhân khẩu</td><td><b>' + s.mem + '</b></td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Người cao tuổi</td><td>' + s.eld + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Trẻ em</td><td>' + s.kid + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Hộ chính sách</td><td>' + s.pol + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Hộ cần hỗ trợ</td><td>' + s.sup + '</td></tr>' +
-    '<tr><td style="padding:2px 8px 2px 0;color:#666">Công trình</td><td>' + s.ct + '</td></tr>' +
+  return '<div style="min-width:230px">' +
+    '<span class="pt">🏘 ' + esc(p.name || 'Tổ') + '</span>' +
+    '<table class="info-table">' +
+    '<tr><td>Số hộ</td><td><b>' + s.to + '</b></td></tr>' +
+    '<tr><td>Nhân khẩu</td><td><b>' + s.mem + '</b></td></tr>' +
+    '<tr><td>Người cao tuổi</td><td>' + s.eld + '</td></tr>' +
+    '<tr><td>Trẻ em</td><td>' + s.kid + '</td></tr>' +
+    '<tr><td>Hộ chính sách</td><td>' + s.pol + '</td></tr>' +
+    '<tr><td>Hộ cần hỗ trợ</td><td>' + s.sup + '</td></tr>' +
+    '<tr><td>Công trình</td><td>' + s.ct + '</td></tr>' +
     '</table>' +
-    '<button onclick="renameTo(this)" style="margin-top:6px">✏️ Đổi tên</button> ' +
+    '<button class="primary" onclick="renameTo(this)">✏️ Đổi tên</button> ' +
     '<button onclick="deleteTo(this)">🗑 Xóa tổ</button></div>';
 }
 
