@@ -181,7 +181,7 @@ const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z
   {maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: gAttrib});
 const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
   {maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: gAttrib});
-esriSat.addTo(map);
+googleHybrid.addTo(map);   // lớp nền mặc định: Google Hybrid
 
 // ---- Đường ----
 const roadLayer = L.geoJSON(roads, {
