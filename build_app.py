@@ -346,12 +346,14 @@ map.on(L.Draw.Event.CREATED, e => {
     layer.setStyle({color: '#b7791f', weight: 2, fillColor: '#ffeaa7', fillOpacity: .25});
     layer.bindPopup(function(l) { return toInfo(l); });
     totLayer.addLayer(layer);
+    layer.openPopup();           // mở ngay bảng thống kê tổ
   } else {
     layer.feature = {type: 'Feature', properties: {building: 'house', name: '', 'addr:housenumber': '',
       members: '', elderly: '', children: '', policy: 'Không', support: 'Không', note: ''}};
     layer.uid = uid++;
     layer.bindPopup(function(l) { return houseInfo(l); });
     drawn.addLayer(layer);
+    layer.setPopupContent(houseForm(layer));  // mở thẳng form nhập khi vẽ xong
     layer.openPopup();
   }
   saveState();
