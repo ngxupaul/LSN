@@ -17,7 +17,6 @@ def inline(path):
         return json.dumps({"type": "FeatureCollection", "features": []}, ensure_ascii=False)
 
 ROADS = inline("data/zone_roads.geojson")
-EXTENT = inline("data/zone_extent.geojson")
 
 HELP_TEXT = (
     "1) Lớp nền: chọn \"Google Vệ tinh\" / \"Google Hybrid\" để thấy rõ mái nhà.\n"
@@ -142,6 +141,7 @@ PAGE = """<!DOCTYPE html>
   <span class="sep"></span>
   <button id="btnMoc" title="Đặt mốc">📌 Đặt mốc</button>
   <button id="btnImport" title="Nạp file GeoJSON">📂 Import</button>
+  <button id="btnDelTo" class="danger" title="Xóa toàn bộ ranh giới tổ (giữ nhà + mốc)">🗑 Xóa tổ</button>
   <button id="btnClear" class="danger" title="Xóa toàn bộ dữ liệu">🗑 Xóa hết</button>
   <button id="btnHelp">❓ Hướng dẫn</button>
 </div>
@@ -162,7 +162,6 @@ PAGE = """<!DOCTYPE html>
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script>
 const roads = __ROADS__;
-const extent = __EXTENT__;
 
 const map = L.map('map', {preferCanvas: true}).setView([15.9606, 108.1855], 16);
 
@@ -199,12 +198,10 @@ const kiet1 = L.circleMarker([15.9610, 108.1827], {radius: 9, color: '#ff4d4d', 
   .addTo(map).bindPopup('<b>Kiệt 1 Đường ĐH409</b><br>Thôn Lệ Sơn Nam<br>(15.96100, 108.18270)');
 const kiet12 = L.circleMarker([15.9627, 108.1793], {radius: 9, color: '#ff4d4d', weight: 2.5, fillColor: '#fff', fillOpacity: 1})
   .addTo(map).bindPopup('<b>Kiệt 12 Đường ĐH409</b><br>Thôn Lệ Sơn Bắc<br>(15.96269, 108.17934)');
-const extentLayer = L.geoJSON(extent, {style: {color: '#e67e22', weight: 2, dashArray: '6 4', fill: false}}).addTo(map);
-
 L.control.layers(
   {'Bản đồ OSM': osm, 'Vệ tinh (Esri)': esriSat, 'Vệ tinh + tên đường (Esri)': esriHybrid,
    'Google Maps (road)': googleRoad, 'Google Vệ tinh': googleSat, 'Google Hybrid': googleHybrid},
-  {'Đường OSM': roadLayer, 'Phạm vi ước tính': extentLayer, 'Mốc thôn': L.layerGroup([kiet1, kiet12])}
+  {'Đường OSM': roadLayer, 'Mốc thôn': L.layerGroup([kiet1, kiet12])}
 ).addTo(map);
 
 // ================= DỮ LIỆU =================
@@ -582,7 +579,13 @@ document.getElementById('fileImport').addEventListener('change', ev => {
   ev.target.value = '';
 });
 
-// ================= XÓA HẾT =================
+// ================= XÓA TỔ / XÓA HẾT =================
+document.getElementById('btnDelTo').onclick = () => {
+  if (!totLayer.getLayers().length) { alert('Chưa có ranh giới tổ nào.'); return; }
+  if (!confirm('Xóa toàn bộ ranh giới tổ đã vẽ? (giữ nguyên nhà + mốc)')) return;
+  totLayer.clearLayers();
+  saveState();
+};
 document.getElementById('btnClear').onclick = () => {
   if (!confirm('Xóa toàn bộ nhà + tổ + mốc? (không thể hoàn tác)')) return;
   drawn.clearLayers();
@@ -604,7 +607,6 @@ map.on('mousemove', e => {
 """
 
 PAGE = (PAGE.replace("__ROADS__", ROADS)
-           .replace("__EXTENT__", EXTENT)
            .replace("__HELP__", json.dumps(HELP_TEXT, ensure_ascii=False)))
 
 with open("index.html", "w") as f:
