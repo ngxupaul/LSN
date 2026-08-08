@@ -120,7 +120,7 @@
   con trỏ: <span class="c" id="coord">–</span></div>
 <div class="legend">
   <i style="background:#00a651"></i> Nhà ở<br>
-  <i style="background:#ffeaa7;border:1px solid #b7791f"></i> Ranh giới tổ<br>
+  <i style="background:linear-gradient(90deg,#e67e22,#2980b9,#27ae60,#8e44ad,#c0392b);border:1px solid #555"></i> Ranh giới tổ (mỗi tổ 1 màu)<br>
   <i style="background:#ff4d4d;border-radius:50%"></i> Mốc thôn (Kiệt 1 / Kiệt 12)
 </div>
 <button id="exportBtn" class="leaflet-bar">⬇ Xuất GeoJSON</button>
@@ -175,6 +175,10 @@ L.control.layers(
 const STORE_KEY = 'lesonnam_household_v3';
 const drawn = L.featureGroup().addTo(map);      // nhà
 const totLayer = L.featureGroup().addTo(map);   // tổ
+// Bảng màu cho từng tổ (mỗi tổ 1 màu riêng, lặp lại khi quá 12 tổ)
+const TO_COLORS = ['#e67e22', '#2980b9', '#27ae60', '#8e44ad', '#c0392b', '#16a085',
+                   '#d35400', '#2c3e50', '#7d6608', '#5dade2', '#e84393', '#00b894'];
+function toColor(n) { return TO_COLORS[n % TO_COLORS.length]; }
 const mocLayer = L.featureGroup().addTo(map);   // mốc
 let uid = 1;
 
@@ -321,11 +325,12 @@ map.on(L.Draw.Event.CREATED, e => {
   const layer = e.layer;
   if (drawMode === 'to') {
     const name = prompt('Tên tổ (vd: Tổ 1, Tổ 2, Khu dân cư...):', 'Tổ ' + (totLayer.getLayers().length + 1));
-    layer.feature = {type: 'Feature', properties: {name: (name || 'Tổ'), type: 'to', note: ''}};
+    const color = toColor(totLayer.getLayers().length);
+    layer.feature = {type: 'Feature', properties: {name: (name || 'Tổ'), type: 'to', note: '', color: color}};
     layer.uid = uid++;
-    layer.setStyle({color: '#b7791f', weight: 2, fillColor: '#ffeaa7', fillOpacity: .25});
+    layer.setStyle({color: color, weight: 2.5, fillColor: color, fillOpacity: .3});
     layer.bindPopup(function(l) { return toInfo(l); });
-    totLayer.addLayer(layer);
+    totLayer.addLayer(layer);    // thêm sau => vẽ đè lên tổ cũ (ranh giới trùng nhìn rõ)
     layer.openPopup();           // mở ngay bảng thống kê tổ
   } else {
     layer.feature = {type: 'Feature', properties: {name: '', 'addr:housenumber': '',
@@ -355,7 +360,9 @@ function addFeature(f) {
   l.feature = f;
   l.uid = uid++;
   if (f.properties && f.properties.type === 'to') {
-    l.setStyle({color: '#b7791f', weight: 2, fillColor: '#ffeaa7', fillOpacity: .25});
+    const color = f.properties.color || toColor(totLayer.getLayers().length);
+    f.properties.color = color;
+    l.setStyle({color: color, weight: 2.5, fillColor: color, fillOpacity: .3});
     l.bindPopup(function(l) { return toInfo(l); });
     totLayer.addLayer(l);
   } else {
@@ -368,7 +375,7 @@ function collectAll() {
   totLayer.eachLayer(t => {
     const g = t.toGeoJSON();
     const p = props(t);
-    g.properties = Object.assign({}, g.properties, {type: 'to', name: p.name || 'Tổ', note: p.note || 'Ranh giới tổ dân cư (vẽ tay)'});
+    g.properties = Object.assign({}, g.properties, {type: 'to', name: p.name || 'Tổ', note: p.note || 'Ranh giới tổ dân cư (vẽ tay)', color: p.color});
     features.push(g);
   });
   drawn.eachLayer(l => {
