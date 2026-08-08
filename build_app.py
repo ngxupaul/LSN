@@ -27,6 +27,7 @@ HELP_TEXT = (
     "5) 📊 Thống kê: bảng tổng hợp toàn thôn theo tổ.\n"
     "6) Click nhà bất kỳ để xem/sửa thông tin hộ.\n"
     "7) 📋 Danh sách: xem tổ + nhà, nhấp để nhảy tới.\n"
+    "9) PHÍM TẮT: bấm D để bật ngay công cụ vẽ polygon (theo chế độ hiện tại).\n"
     "8) ⬇ Xuất GeoJSON để tải dữ liệu (JOSM / iD / app riêng).\n\n"
     "Mọi thay đổi tự lưu — reload không mất dữ liệu."
 )
@@ -255,6 +256,20 @@ function activateMode(mode) {
 }
 // 1 nút xoay vòng: Vẽ nhà → Vẽ tổ → Vẽ ranh thôn → Vẽ nhà ...
 btnMode.onclick = () => activateMode(drawMode === 'house' ? 'to' : (drawMode === 'to' ? 'thon' : 'house'));
+
+// ---- Phím D: bật ngay công cụ vẽ polygon theo chế độ hiện tại ----
+let drawBusy = false;
+map.on(L.Draw.Event.DRAWSTART, () => { drawBusy = true; });
+map.on(L.Draw.Event.DRAWSTOP, () => { drawBusy = false; });
+document.addEventListener('keydown', ev => {
+  if (ev.key.toLowerCase() !== 'd' || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  if (ev.target && (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.tagName === 'SELECT')) return;
+  if (drawBusy) return;   // đang vẽ dở thì không khởi động lại
+  const opts = drawMode === 'to' ? toDrawControl.options.draw.polygon :
+               drawMode === 'thon' ? thonDrawControl.options.draw.polygon :
+               houseDrawControl.options.draw.polygon;
+  new L.Draw.Polygon(map, opts).enable();
+});
 
 // ================= POPUP: NHÀ =================
 function houseInfo(l) {
