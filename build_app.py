@@ -238,16 +238,16 @@ const thonDrawControl = new L.Control.Draw({
          polyline: false, circle: false, circlemarker: false, marker: false}
 });
 let drawMode = 'house';
+let activeControl = houseDrawControl;   // control đang hiển thị trên bản đồ
 map.addControl(houseDrawControl);
 const btnMode = document.getElementById('btnMode');
 function activateMode(mode) {
   drawMode = mode;
-  map.removeControl(houseDrawControl);
-  map.removeControl(toDrawControl);
-  map.removeControl(thonDrawControl);
-  if (mode === 'to') map.addControl(toDrawControl);
-  else if (mode === 'thon') map.addControl(thonDrawControl);
-  else map.addControl(houseDrawControl);
+  // chỉ gỡ control đang dùng (tránh onRemove trên control chưa thêm -> crash)
+  map.removeControl(activeControl);
+  if (mode === 'to') { map.addControl(toDrawControl); activeControl = toDrawControl; }
+  else if (mode === 'thon') { map.addControl(thonDrawControl); activeControl = thonDrawControl; }
+  else { map.addControl(houseDrawControl); activeControl = houseDrawControl; }
   if (mode === 'to') { btnMode.textContent = '🏘 Vẽ tổ'; }
   else if (mode === 'thon') { btnMode.textContent = '🗺 Vẽ ranh thôn'; }
   else { btnMode.textContent = '🏘 Vẽ nhà'; }
