@@ -166,6 +166,7 @@ const kiet1 = L.circleMarker([15.9610, 108.1827], {radius: 9, color: '#ff4d4d', 
   .addTo(map).bindPopup('<b>Kiệt 1 Đường ĐH409</b><br>Thôn Lệ Sơn Nam<br>(15.96100, 108.18270)');
 const kiet12 = L.circleMarker([15.9627, 108.1793], {radius: 9, color: '#ff4d4d', weight: 2.5, fillColor: '#fff', fillOpacity: 1})
   .addTo(map).bindPopup('<b>Kiệt 12 Đường ĐH409</b><br>Thôn Lệ Sơn Bắc<br>(15.96269, 108.17934)');
+const thonLayer = L.featureGroup().addTo(map);  // ranh giới thôn (khai báo trước L.control.layers)
 L.control.layers(
   {'Bản đồ OSM': osm, 'Vệ tinh (Esri)': esriSat, 'Vệ tinh + tên đường (Esri)': esriHybrid,
    'Google Maps (road)': googleRoad, 'Google Vệ tinh': googleSat, 'Google Hybrid': googleHybrid},
@@ -198,7 +199,6 @@ const toDrawControl = new L.Control.Draw({
   draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#b7791f'}}, rectangle: true,
          polyline: false, circle: false, circlemarker: false, marker: false}
 });
-const thonLayer = L.featureGroup().addTo(map);    // ranh giới thôn
 const thonDrawControl = new L.Control.Draw({
   edit: {featureGroup: thonLayer},
   draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#b91c1c'}}, rectangle: true,
