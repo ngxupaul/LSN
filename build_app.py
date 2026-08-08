@@ -135,6 +135,7 @@ PAGE = """<!DOCTYPE html>
 <div id="map"></div>
 <div id="tools">
   <button id="btnMode" title="Chuyển chế độ vẽ: nhà ↔ tổ">🏘 Vẽ nhà</button>
+  <button id="btnThon" title="Vẽ ranh giới thôn (chỉ 1 ranh giới)">🗺 Ranh giới thôn</button>
   <span class="sep"></span>
   <button id="btnList" title="Hiện/ẩn danh sách">📋 Danh sách</button>
   <button id="btnStats" title="Bảng thống kê theo tổ">📊 Thống kê</button>
@@ -154,6 +155,7 @@ PAGE = """<!DOCTYPE html>
 <div class="legend">
   <i style="background:#00a651"></i> Nhà ở<br>
   <i style="background:linear-gradient(90deg,#e67e22,#2980b9,#27ae60,#8e44ad,#c0392b);border:1px solid #555"></i> Ranh giới tổ (mỗi tổ 1 màu)<br>
+  <i style="background:transparent;border:2px dashed #b91c1c"></i> Ranh giới thôn<br>
   <i style="background:#ff4d4d;border-radius:50%"></i> Mốc thôn (Kiệt 1 / Kiệt 12)
 </div>
 <button id="exportBtn" class="leaflet-bar">⬇ Xuất GeoJSON</button>
@@ -201,7 +203,7 @@ const kiet12 = L.circleMarker([15.9627, 108.1793], {radius: 9, color: '#ff4d4d',
 L.control.layers(
   {'Bản đồ OSM': osm, 'Vệ tinh (Esri)': esriSat, 'Vệ tinh + tên đường (Esri)': esriHybrid,
    'Google Maps (road)': googleRoad, 'Google Vệ tinh': googleSat, 'Google Hybrid': googleHybrid},
-  {'Đường OSM': roadLayer, 'Mốc thôn': L.layerGroup([kiet1, kiet12])}
+  {'Đường OSM': roadLayer, 'Ranh giới thôn': thonLayer, 'Mốc thôn': L.layerGroup([kiet1, kiet12])}
 ).addTo(map);
 
 // ================= DỮ LIỆU =================
@@ -230,16 +232,31 @@ const toDrawControl = new L.Control.Draw({
   draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#b7791f'}}, rectangle: true,
          polyline: false, circle: false, circlemarker: false, marker: false}
 });
+const thonLayer = L.featureGroup().addTo(map);    // ranh giới thôn
+const thonDrawControl = new L.Control.Draw({
+  edit: {featureGroup: thonLayer},
+  draw: {polygon: {allowIntersection: false, shapeOptions: {color: '#b91c1c'}}, rectangle: true,
+         polyline: false, circle: false, circlemarker: false, marker: false}
+});
 let drawMode = 'house';
 map.addControl(houseDrawControl);
 const btnMode = document.getElementById('btnMode');
-btnMode.onclick = () => {
-  drawMode = (drawMode === 'house') ? 'to' : 'house';
-  map.removeControl(drawMode === 'house' ? toDrawControl : houseDrawControl);
-  map.addControl(drawMode === 'house' ? houseDrawControl : toDrawControl);
-  btnMode.textContent = drawMode === 'house' ? '🏘 Vẽ nhà' : '🏘 Vẽ tổ';
-  btnMode.classList.toggle('active', drawMode === 'to');
-};
+const btnThon = document.getElementById('btnThon');
+function activateMode(mode) {
+  drawMode = mode;
+  map.removeControl(houseDrawControl);
+  map.removeControl(toDrawControl);
+  map.removeControl(thonDrawControl);
+  if (mode === 'to') map.addControl(toDrawControl);
+  else if (mode === 'thon') map.addControl(thonDrawControl);
+  else map.addControl(houseDrawControl);
+  btnMode.textContent = mode === 'to' ? '🏘 Vẽ tổ' : '🏘 Vẽ nhà';
+  btnMode.classList.toggle('active', mode === 'to');
+  btnThon.textContent = mode === 'thon' ? '🗺 Đang vẽ ranh thôn' : '🗺 Ranh giới thôn';
+  btnThon.classList.toggle('active', mode === 'thon');
+}
+btnMode.onclick = () => activateMode(drawMode === 'house' ? 'to' : 'house');
+btnThon.onclick = () => activateMode(drawMode === 'thon' ? 'house' : 'thon');
 
 // ================= POPUP: NHÀ =================
 function houseInfo(l) {
@@ -307,6 +324,51 @@ function toInfo(l) {
     '<button onclick="deleteTo(this)">🗑 Xóa tổ</button></div>';
 }
 
+// ================= POPUP: RANH GIỚI THÔN =================
+function polyAreaM2(ring) {
+  let a = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    a += (ring[j].lng * ring[i].lat - ring[i].lng * ring[j].lat);
+  }
+  a = Math.abs(a / 2);
+  const mLat = 111320;
+  const mLng = 111320 * Math.cos(ring[0].lat * Math.PI / 180);
+  return a * mLat * mLng;
+}
+function thonInfo(l) {
+  const p = props(l);
+  const ring = l.getLatLngs()[0];
+  const c = l.getBounds().getCenter();
+  const ha = (polyAreaM2(ring) / 10000).toFixed(2);
+  return '<div style="min-width:230px">' +
+    '<span class="pt">🗺 ' + esc(p.name || 'Ranh giới thôn') + '</span>' +
+    '<table class="info-table">' +
+    '<tr><td>Diện tích</td><td><b>' + ha + ' ha</b></td></tr>' +
+    '<tr><td>Tâm</td><td>' + c.lat.toFixed(6) + ', ' + c.lng.toFixed(6) + '</td></tr>' +
+    '</table>' +
+    '<button class="primary" onclick="renameThon(this)">✏️ Đổi tên</button> ' +
+    '<button onclick="deleteThon(this)">🗑 Xóa</button></div>';
+}
+function findThonLayer(el) {
+  const pop = el.closest('.leaflet-popup');
+  let l = null;
+  thonLayer.eachLayer(t => { if (t.getPopup() && t.getPopup().getElement() === pop) l = t; });
+  return l;
+}
+window.renameThon = function(btn) {
+  const l = findThonLayer(btn);
+  if (!l) return;
+  const name = prompt('Tên ranh giới thôn:', props(l).name || 'Ranh giới thôn');
+  if (name === null) return;
+  props(l).name = name;
+  l.setPopupContent(thonInfo(l));
+  saveState();
+};
+window.deleteThon = function(btn) {
+  const l = findThonLayer(btn);
+  if (l && confirm('Xóa ranh giới thôn?')) { thonLayer.removeLayer(l); saveState(); }
+};
+
 // ================= THAO TÁC =================
 function findLayer(el) {
   const pop = el.closest('.leaflet-popup');
@@ -356,7 +418,17 @@ window.deleteTo = function(btn) {
 // ---- Sự kiện vẽ ----
 map.on(L.Draw.Event.CREATED, e => {
   const layer = e.layer;
-  if (drawMode === 'to') {
+  if (drawMode === 'thon') {
+    // chỉ giữ 1 ranh giới thôn: vẽ mới thay thế ranh giới cũ
+    const old = thonLayer.getLayers()[0];
+    if (old) thonLayer.removeLayer(old);
+    layer.feature = {type: 'Feature', properties: {name: 'Ranh giới thôn', type: 'thon', note: ''}};
+    layer.uid = uid++;
+    layer.setStyle({color: '#b91c1c', weight: 3.5, fillColor: '#fca5a5', fillOpacity: .12, dashArray: '8 4'});
+    layer.bindPopup(function(l) { return thonInfo(l); });
+    thonLayer.addLayer(layer);
+    layer.openPopup();
+  } else if (drawMode === 'to') {
     const name = prompt('Tên tổ (vd: Tổ 1, Tổ 2, Khu dân cư...):', 'Tổ ' + (totLayer.getLayers().length + 1));
     const color = toColor(totLayer.getLayers().length);
     layer.feature = {type: 'Feature', properties: {name: (name || 'Tổ'), type: 'to', note: '', color: color}};
@@ -398,6 +470,10 @@ function addFeature(f) {
     l.setStyle({color: color, weight: 2.5, fillColor: color, fillOpacity: .3});
     l.bindPopup(function(l) { return toInfo(l); });
     totLayer.addLayer(l);
+  } else if (f.properties && f.properties.type === 'thon') {
+    l.setStyle({color: '#b91c1c', weight: 3.5, fillColor: '#fca5a5', fillOpacity: .12, dashArray: '8 4'});
+    l.bindPopup(function(l) { return thonInfo(l); });
+    thonLayer.addLayer(l);
   } else {
     l.bindPopup(function(l) { return houseInfo(l); });
     drawn.addLayer(l);
@@ -405,6 +481,12 @@ function addFeature(f) {
 }
 function collectAll() {
   const features = [];
+  thonLayer.eachLayer(t => {
+    const g = t.toGeoJSON();
+    const p = props(t);
+    g.properties = Object.assign({}, g.properties, {type: 'thon', name: p.name || 'Ranh giới thôn', note: p.note || 'Ranh giới thôn (vẽ tay)'});
+    features.push(g);
+  });
   totLayer.eachLayer(t => {
     const g = t.toGeoJSON();
     const p = props(t);
@@ -448,6 +530,10 @@ function restoreState() {
 function refreshList() {
   const body = document.getElementById('listBody');
   const rows = [];
+  thonLayer.eachLayer(t => {
+    const p = props(t);
+    rows.push({uid: t.uid, kind: 'thon', label: '🗺 ' + (p.name || 'Ranh giới thôn'), detail: ''});
+  });
   totLayer.eachLayer(t => {
     const p = props(t);
     rows.push({uid: t.uid, kind: 'to', label: '🏘 ' + (p.name || 'Tổ'), detail: ''});
@@ -465,6 +551,7 @@ function refreshList() {
   document.getElementById('btnList').textContent = '📋 Danh sách (' + rows.length + ')';
 }
 window.gotoItem = function(uid) {
+  thonLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); t.openPopup(); } });
   totLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); t.openPopup(); } });
   drawn.eachLayer(l => { if (l.uid === uid) { map.flyTo(l.getBounds().getCenter(), 19); l.openPopup(); } });
 };
@@ -597,6 +684,7 @@ document.getElementById('btnClear').onclick = () => {
   if (!confirm('Xóa toàn bộ nhà + tổ + mốc? (không thể hoàn tác)')) return;
   drawn.clearLayers();
   totLayer.clearLayers();
+  thonLayer.clearLayers();
   mocLayer.clearLayers();
   saveState();
 };
