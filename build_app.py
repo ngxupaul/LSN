@@ -134,8 +134,7 @@ PAGE = """<!DOCTYPE html>
 <body>
 <div id="map"></div>
 <div id="tools">
-  <button id="btnMode" title="Chuyển chế độ vẽ: nhà ↔ tổ">🏘 Vẽ nhà</button>
-  <button id="btnThon" title="Vẽ ranh giới thôn (chỉ 1 ranh giới)">🗺 Ranh giới thôn</button>
+  <button id="btnMode" title="Xoay vòng chế độ vẽ: nhà → tổ → ranh giới thôn">🏘 Vẽ nhà</button>
   <span class="sep"></span>
   <button id="btnList" title="Hiện/ẩn danh sách">📋 Danh sách</button>
   <button id="btnStats" title="Bảng thống kê theo tổ">📊 Thống kê</button>
@@ -241,7 +240,6 @@ const thonDrawControl = new L.Control.Draw({
 let drawMode = 'house';
 map.addControl(houseDrawControl);
 const btnMode = document.getElementById('btnMode');
-const btnThon = document.getElementById('btnThon');
 function activateMode(mode) {
   drawMode = mode;
   map.removeControl(houseDrawControl);
@@ -250,13 +248,13 @@ function activateMode(mode) {
   if (mode === 'to') map.addControl(toDrawControl);
   else if (mode === 'thon') map.addControl(thonDrawControl);
   else map.addControl(houseDrawControl);
-  btnMode.textContent = mode === 'to' ? '🏘 Vẽ tổ' : '🏘 Vẽ nhà';
-  btnMode.classList.toggle('active', mode === 'to');
-  btnThon.textContent = mode === 'thon' ? '🗺 Đang vẽ ranh thôn' : '🗺 Ranh giới thôn';
-  btnThon.classList.toggle('active', mode === 'thon');
+  if (mode === 'to') { btnMode.textContent = '🏘 Vẽ tổ'; }
+  else if (mode === 'thon') { btnMode.textContent = '🗺 Vẽ ranh thôn'; }
+  else { btnMode.textContent = '🏘 Vẽ nhà'; }
+  btnMode.classList.toggle('active', mode !== 'house');
 }
-btnMode.onclick = () => activateMode(drawMode === 'house' ? 'to' : 'house');
-btnThon.onclick = () => activateMode(drawMode === 'thon' ? 'house' : 'thon');
+// 1 nút xoay vòng: Vẽ nhà → Vẽ tổ → Vẽ ranh thôn → Vẽ nhà ...
+btnMode.onclick = () => activateMode(drawMode === 'house' ? 'to' : (drawMode === 'to' ? 'thon' : 'house'));
 
 // ================= POPUP: NHÀ =================
 function houseInfo(l) {
