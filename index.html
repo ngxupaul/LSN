@@ -150,7 +150,7 @@ const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z
   {maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: gAttrib});
 googleHybrid.addTo(map);   // lớp nền mặc định: Google Hybrid
 
-// ---- Đường ----
+// ---- Đường (tắt mặc định — bật lại qua nút lớp góc phải trên) ----
 const roadLayer = L.geoJSON(roads, {
   style: f => ({
     color: f.properties.highway === 'primary' ? '#e67e22' :
@@ -158,7 +158,7 @@ const roadLayer = L.geoJSON(roads, {
     weight: f.properties.highway === 'service' ? 1.5 : 3, opacity: .9
   }),
   onEachFeature: (f, l) => { if (f.properties.name) l.bindTooltip(f.properties.name, {sticky: true}); }
-}).addTo(map);
+});
 
 // ---- Mốc thôn ----
 const kiet1 = L.circleMarker([15.9610, 108.1827], {radius: 9, color: '#ff4d4d', weight: 2.5, fillColor: '#fff', fillOpacity: 1})
