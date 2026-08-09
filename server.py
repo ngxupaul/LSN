@@ -5,7 +5,7 @@ Chạy:  python3 server.py   ->  http://127.0.0.1:8899/
 Dữ liệu app bấm "💾 Lưu về máy" sẽ ghi vào backups/latest-drawn.json
 """
 import json, os
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 class Handler(SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -37,4 +37,4 @@ class Handler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     print('Server: http://127.0.0.1:8899/  (POST /api/save de luu du lieu)')
-    HTTPServer(('127.0.0.1', 8899), Handler).serve_forever()
+    ThreadingHTTPServer(('127.0.0.1', 8899), Handler).serve_forever()
