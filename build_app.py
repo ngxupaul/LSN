@@ -82,6 +82,10 @@ PAGE = """<!DOCTYPE html>
                font:13px system-ui; padding:9px 12px; border:1px solid var(--line); border-radius:12px;
                box-shadow:var(--shadow); outline:none; transition:border .15s; }
   #searchBox:focus { border-color:var(--primary); }
+  #idBox { position:absolute; z-index:1000; top:146px; left:56px; width:300px;
+           font:13px system-ui; padding:9px 12px; border:1px solid var(--line); border-radius:12px;
+           box-shadow:var(--shadow); outline:none; }
+  #idBox:focus { border-color:#7c3aed; }
   /* bảng danh sách + thống kê */
   #listPanel, #statsPanel { position:absolute; z-index:1000; top:150px; left:56px; width:360px; max-height:62%;
                background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
@@ -149,6 +153,7 @@ PAGE = """<!DOCTYPE html>
 </div>
 <input type="file" id="fileImport" accept=".geojson,.json" style="display:none">
 <input id="searchBox" placeholder="🔍 Tìm kiếm (vd: nhà văn hóa, ĐH409...) — Enter">
+<input id="idBox" placeholder="🆔 Nhập ID nhà (vd: LSN-H023) → Enter" style="top:146px">
 <div id="listPanel"><h3>📋 Danh sách tổ & nhà</h3><div id="listBody"></div></div>
 <div id="statsPanel"><h3>📊 Thống kê theo tổ</h3><div id="statsBody"></div></div>
 <div id="bar"><b>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam + Lệ Sơn Bắc</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
@@ -225,6 +230,7 @@ function nextToColor() {
 function toColor(n) { return TO_COLORS[n % TO_COLORS.length]; }
 const mocLayer = L.featureGroup().addTo(map);   // mốc
 let uid = 1;
+let houseSeq = 0;   // bộ đếm ID nhà (LSN-H001...)
 
 function props(l) { return (l.feature && l.feature.properties) || {}; }
 function esc(s) { return String(s == null ? '' : s).replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
@@ -285,6 +291,7 @@ function houseInfo(l) {
   return '<div style="min-width:240px">' +
     '<span class="pt">🏠 ' + (esc(p['addr:housenumber']) ? 'Số ' + esc(p['addr:housenumber']) + ' — ' : '') +
       (esc(p.name) || 'Chưa có tên') + '</span>' +
+    '<div style="background:#f3e8ff;border:1px solid #d8b4fe;border-radius:8px;padding:4px 8px;margin-bottom:6px;font-weight:700;color:#6b21a8">🆔 ID GeoJSON: ' + esc(p.fid || '—') + '</div>' +
     '<table class="info-table">' +
     '<tr><td>Chủ hộ</td><td><b>' + (esc(p.name) || '—') + '</b></td></tr>' +
     '<tr><td>Số nhà</td><td>' + (esc(p['addr:housenumber']) || '—') + '</td></tr>' +
@@ -460,7 +467,7 @@ map.on(L.Draw.Event.CREATED, e => {
     layer.openPopup();           // mở ngay bảng thống kê tổ
   } else {
     layer.feature = {type: 'Feature', properties: {name: '', 'addr:housenumber': '',
-      members: '', elderly: '', children: '', note: ''}};
+      members: '', elderly: '', children: '', note: '', fid: 'LSN-H' + String(++houseSeq).padStart(3, '0')}};
     layer.uid = uid++;
     layer.bindPopup(function(l) { return houseInfo(l); });
     drawn.addLayer(layer);
@@ -509,6 +516,7 @@ function addFeature(f) {
     l.bindPopup(function(l) { return thonInfo(l); });
     thonLayer.addLayer(l);
   } else {
+    if (!f.properties.fid) f.properties.fid = 'LSN-H' + String(++houseSeq).padStart(3, '0');
     l.bindPopup(function(l) { return houseInfo(l); });
     drawn.addLayer(l);
   }
@@ -530,7 +538,9 @@ function collectAll() {
   drawn.eachLayer(l => {
     const p = props(l);
     features.push({type: 'Feature',
+      id: p.fid || undefined,
       properties: {
+        fid: p.fid || undefined,
         name: p.name || undefined,
         'addr:housenumber': p['addr:housenumber'] || undefined,
         members: p.members || undefined,
@@ -578,7 +588,7 @@ function refreshList() {
   drawn.eachLayer(l => {
     const p = props(l);
     const numS = p['addr:housenumber'] ? 'Số ' + p['addr:housenumber'] + ' — ' : '';
-    rows.push({uid: l.uid, kind: 'house', label: numS + (p.name || 'Nhà'),
+    rows.push({uid: l.uid, kind: 'house', label: '🆔' + (p.fid || '?') + ' · ' + numS + (p.name || 'Nhà'),
       detail: p.members ? ' · ' + p.members + ' người' : ''});
   });
   body.innerHTML = rows.map(r =>
@@ -659,6 +669,23 @@ map.on('click', e => {
   btnMoc.classList.remove('active');
   btnMoc.textContent = '📌 Đặt mốc';
   map.getContainer().style.cursor = '';
+});
+
+// ================= TÌM THEO ID GEOJSON =================
+document.getElementById('idBox').addEventListener('keydown', ev => {
+  if (ev.key !== 'Enter') return;
+  const q = ev.target.value.trim().toUpperCase();
+  if (!q) return;
+  let found = null;
+  drawn.eachLayer(l => { const p = props(l); if (p.fid && p.fid.toUpperCase() === q) found = l; });
+  if (found) {
+    map.flyTo(found.getBounds().getCenter(), 19);
+    found.setPopupContent(houseInfo(found));
+    found.openPopup();
+    document.getElementById('savedMsg').textContent = '🆔 ' + q;
+  } else {
+    alert('Không tìm thấy nhà có ID ' + q + '. Bấm vào nhà trên bản đồ để xem ID.');
+  }
 });
 
 // ================= TÌM KIẾM =================
