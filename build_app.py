@@ -107,12 +107,8 @@ PAGE = """<!DOCTYPE html>
   #searchResults .result:hover { background:#f0fdf4; }
   #searchResults .result b { color:#166534; }
   #searchResults .result small { display:block; color:var(--muted); margin-top:2px; }
-  #idBox { position:absolute; z-index:1000; top:204px; left:56px; width:320px;
-           font:13px system-ui; padding:9px 12px; border:1px solid var(--line); border-radius:12px;
-           box-shadow:var(--shadow); outline:none; }
-  #idBox:focus { border-color:#7c3aed; }
   /* bảng danh sách + thống kê */
-  #listPanel, #statsPanel { position:absolute; z-index:1000; top:244px; left:56px; width:360px; max-height:62%;
+  #listPanel, #statsPanel { position:absolute; z-index:1000; top:198px; left:56px; width:360px; max-height:62%;
                background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
                box-shadow:var(--shadow); display:none; overflow-y:auto; font:13px system-ui; }
   #statsPanel { left:428px; }
@@ -216,8 +212,7 @@ PAGE = """<!DOCTYPE html>
     #tools button { padding:6px 8px; font-size:11.5px; }
     #searchBox { top:148px; left:10px; width:calc(100% - 20px); }
     #searchResults { top:186px; left:10px; width:calc(100% - 20px); }
-    #idBox { top:226px !important; left:10px; width:calc(100% - 20px); }
-    #listPanel, #statsPanel { top:268px; left:10px; width:calc(100% - 20px); max-height:55%; }
+    #listPanel, #statsPanel { top:208px; left:10px; width:calc(100% - 20px); max-height:55%; }
     #statsPanel { left:10px; }
     body.detail-open #map { width:100%; }
     body.detail-open #brandBar { right:10px; }
@@ -279,7 +274,6 @@ Phạm Thị Ngọc Ánh | 11/05/1982 | Nữ | Tổ 3, ...
 <input type="file" id="fileImport" accept=".geojson,.json" style="display:none">
 <input id="searchBox" placeholder="🔍 Tìm chủ hộ, thành viên hoặc địa danh…" autocomplete="off">
 <div id="searchResults" role="listbox"></div>
-<input id="idBox" placeholder="🆔 Nhập ID nhà (vd: LSN-H023) → Enter">
 <div id="listPanel"><h3>📋 Danh sách tổ & nhà</h3><div id="listBody"></div></div>
 <div id="statsPanel"><h3>📊 Thống kê theo tổ</h3><div id="statsBody"></div></div>
 <aside id="detailPanel" aria-live="polite" aria-label="Dữ liệu vùng được chọn">
@@ -368,6 +362,7 @@ let houseSeq = 0;   // bộ đếm ID nhà (LSN-H001...)
 function props(l) { return (l.feature && l.feature.properties) || {}; }
 function esc(s) { return String(s == null ? '' : s).replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 function num(v) { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
+const SERVER_BACKUP_URL = 'backups/latest-drawn.json';
 const SEED_DATA_URL = 'backups/le-son-nam-2026-08-09-69nha-6fill.json';
 function featureId(f) {
   const p = f && f.properties || {};
@@ -378,6 +373,44 @@ function featureScore(f) {
   const p = f && f.properties || {};
   return (Array.isArray(p.members_list) ? p.members_list.length * 10 : 0) +
     (p.name ? 3 : 0) + (p.members != null ? 1 : 0) + (p.note ? 1 : 0);
+}
+function geometryKey(f) { return featureId(f) + '|' + JSON.stringify(f && f.geometry || null); }
+function mergeFeatureSources(primary, fallback) {
+  const result = (primary || []).map(f => f);
+  const positions = new Map();
+  result.forEach((f, i) => { if (f && f.geometry) positions.set(geometryKey(f), i); });
+  (fallback || []).forEach(f => {
+    if (!f || !f.geometry) return;
+    const key = geometryKey(f);
+    const index = positions.get(key);
+    if (index === undefined) {
+      positions.set(key, result.length);
+      result.push(f);
+      return;
+    }
+    const current = result[index];
+    const currentProps = current.properties || {};
+    const fallbackProps = f.properties || {};
+    if (featureScore(f) > featureScore(current)) {
+      result[index] = Object.assign({}, f, {properties: Object.assign({}, fallbackProps, currentProps)});
+    } else if (!Array.isArray(currentProps.members_list) && Array.isArray(fallbackProps.members_list)) {
+      current.properties = Object.assign({}, currentProps, {
+        members_list: fallbackProps.members_list,
+        members: fallbackProps.members,
+        elderly: fallbackProps.elderly,
+        children: fallbackProps.children
+      });
+    }
+  });
+  return result;
+}
+async function fetchFeatureFile(url) {
+  try {
+    const res = await fetch(url, {cache: 'no-store'});
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : (Array.isArray(data.features) ? data.features : []);
+  } catch (e) { return []; }
 }
 function dedupeFeatures(features) {
   const result = [], positions = new Map(), signatures = new Map();
@@ -899,22 +932,38 @@ function saveState() {
 }
 async function restoreState() {
   let features = [];
-  let source = 'workspace';
-  try { features = JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch (e) { features = []; }
-  if (!Array.isArray(features) || !features.length) {
+  let source = 'trống';
+  const storageKeys = [STORE_KEY, 'lesonnam_household_v2', 'lesonnam_household'];
+  for (const key of storageKeys) {
     try {
-      const res = await fetch(SEED_DATA_URL, {cache: 'no-store'});
-      if (!res.ok) throw new Error('seed ' + res.status);
-      const seed = await res.json();
-      features = seed.features || [];
-      source = 'demo backup';
-    } catch (e) {
-      features = [];
-      source = 'trống';
-    }
+      const stored = JSON.parse(localStorage.getItem(key));
+      const candidate = Array.isArray(stored) ? stored : (stored && Array.isArray(stored.features) ? stored.features : []);
+      if (candidate.length) { features = candidate; source = 'workspace'; break; }
+    } catch (e) { /* thử bản lưu kế tiếp */ }
   }
-  dedupeFeatures(features).forEach(addFeature);
-  setSeedStatus(source === 'demo backup' ? 'Dữ liệu mẫu 2026-08-09' : (features.length ? 'Dữ liệu đã lưu' : 'Chưa có dữ liệu'), !!features.length);
+  const serverFeatures = await fetchFeatureFile(SERVER_BACKUP_URL);
+  const seedFeatures = await fetchFeatureFile(SEED_DATA_URL);
+  if (features.length) {
+    if (serverFeatures.length) features = mergeFeatureSources(features, serverFeatures);
+    if (seedFeatures.length) features = mergeFeatureSources(features, seedFeatures);
+    source = serverFeatures.length ? 'workspace + backup' : source;
+  } else if (serverFeatures.length) {
+    features = serverFeatures;
+    source = 'server backup';
+  } else if (seedFeatures.length) {
+    features = seedFeatures;
+    source = 'demo backup';
+  }
+  const normalizedFeatures = dedupeFeatures(features);
+  normalizedFeatures.forEach(addFeature);
+  if (normalizedFeatures.length) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(collectAll())); } catch (e) { /* vẫn hiển thị được dữ liệu đã khôi phục */ }
+  }
+  const status = source === 'server backup' ? 'Đã khôi phục bản lưu máy chủ' :
+    source === 'workspace + backup' ? 'Đã hợp nhất bản lưu' :
+    source === 'demo backup' ? 'Dữ liệu mẫu 2026-08-09' :
+    (features.length ? 'Dữ liệu đã lưu' : 'Chưa có dữ liệu');
+  setSeedStatus(status, !!features.length);
 }
 
 // ================= DANH SÁCH =================
@@ -1024,7 +1073,8 @@ map.on('click', e => {
 // ================= ĐỔ DỮ LIỆU THEO ID =================
 document.getElementById('btnFill').onclick = () => {
   document.getElementById('fillModal').style.display = 'flex';
-  document.getElementById('fillId').value = document.getElementById('idBox').value.trim() || '';
+  const selectedId = detailLayer && regionKind(detailLayer) === 'house' ? props(detailLayer).fid : '';
+  document.getElementById('fillId').value = selectedId || '';
   document.getElementById('fillData').value = '';
   document.getElementById('fillResult').innerHTML = '';
 };
@@ -1082,21 +1132,6 @@ window.applyFill = function() {
     p.elderly + ' NCT · ' + p.children + ' trẻ em · Chủ hộ: ' + p.name +
     '<br><span style="color:#888">Xem chi tiết trong popup nhà; bấm 💾 Lưu về máy để ghi ra file.</span>';
 };
-
-// ================= TÌM THEO ID GEOJSON =================
-document.getElementById('idBox').addEventListener('keydown', ev => {
-  if (ev.key !== 'Enter') return;
-  const q = ev.target.value.trim().toUpperCase();
-  if (!q) return;
-  let found = null;
-  drawn.eachLayer(l => { const p = props(l); if (p.fid && p.fid.toUpperCase() === q) found = l; });
-  if (found) {
-    focusHouse(found);
-    document.getElementById('savedMsg').textContent = '🆔 ' + q;
-  } else {
-    alert('Không tìm thấy nhà có ID ' + q + '. Bấm vào nhà trên bản đồ để xem ID.');
-  }
-});
 
 // ================= TÌM KIẾM =================
 function normalizeText(s) {
