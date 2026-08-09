@@ -493,6 +493,7 @@ function polyAreaM2(ring) {
 // ================= PANEL DỮ LIỆU THEO VÙNG =================
 let detailLayer = null;
 let detailKind = '';
+let detailClickHandled = false;
 const detailPanel = document.getElementById('detailPanel');
 const detailBody = document.getElementById('detailBody');
 function detailStat(value, label) {
@@ -685,6 +686,9 @@ function bindRegionClick(l) {
   if (!l || l._detailBound) return;
   l._detailBound = true;
   l.on('click', e => {
+    if (mocMode) return;
+    detailClickHandled = true;
+    setTimeout(() => { detailClickHandled = false; }, 0);
     if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
     showDetail(regionKind(l), l);
   });
@@ -693,6 +697,9 @@ function bindMocClick(m) {
   if (!m || m._detailBound) return;
   m._detailBound = true;
   m.on('click', e => {
+    if (mocMode) return;
+    detailClickHandled = true;
+    setTimeout(() => { detailClickHandled = false; }, 0);
     if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
     showMocDetail(m);
   });
@@ -1016,6 +1023,10 @@ btnMoc.onclick = () => {
   map.getContainer().style.cursor = mocMode ? 'crosshair' : '';
 };
 map.on('click', e => {
+  if (detailClickHandled) {
+    detailClickHandled = false;
+    return;
+  }
   if (!mocMode) { closeDetail(); return; }
   closeDetail();
   const m = L.circleMarker(e.latlng, {radius: 12, color: '#e67e22', weight: 3, fillColor: '#ffe08a', fillOpacity: .9})
