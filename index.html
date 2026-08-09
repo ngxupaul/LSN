@@ -93,6 +93,42 @@
   #statsPanel td:first-child, #statsPanel th:first-child { text-align:left; font-weight:600; }
   #statsPanel tr.total td { font-weight:800; background:#fef3c7; }
   #statsPanel tr:hover td { background:#f9fafb; }
+  /* panel dữ liệu theo vùng được chọn */
+  #detailPanel { position:absolute; z-index:1200; top:70px; right:12px; width:360px; max-height:calc(100% - 132px);
+                 display:none; flex-direction:column; background:rgba(255,255,255,.98); border:1px solid var(--line);
+                 border-radius:16px; box-shadow:0 12px 34px rgba(17,24,39,.2); overflow:hidden; }
+  #detailPanel.open { display:flex; }
+  #detailHeader { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:15px 16px 12px;
+                  background:linear-gradient(135deg,#f0fdf4,#ffffff 62%); border-bottom:1px solid var(--line); }
+  #detailHeader .eyebrow { display:block; color:#15803d; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+  #detailHeader h2 { margin:3px 0 2px; font-size:18px; line-height:1.2; }
+  #detailHeader .subtitle { display:block; color:var(--muted); font-size:11px; }
+  #detailClose { width:30px; height:30px; flex:none; border:1px solid var(--line); border-radius:9px; background:#fff;
+                 color:var(--muted); font-size:20px; line-height:1; cursor:pointer; }
+  #detailClose:hover { color:var(--text); background:#f3f4f6; }
+  #detailBody { overflow:auto; padding:14px 16px 16px; }
+  .detailBadge { display:inline-flex; align-items:center; min-height:22px; padding:3px 8px; border-radius:999px;
+                 background:#dcfce7; color:#166534; font-size:10px; font-weight:800; }
+  .detailId { display:block; margin-top:7px; color:#7c3aed; font:11px ui-monospace,Menlo,monospace; }
+  .detailStats { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:12px 0 16px; }
+  .detailStat { padding:9px 8px; border:1px solid #dcfce7; border-radius:10px; background:#f0fdf4; text-align:center; }
+  .detailStat b { display:block; color:#166534; font-size:18px; line-height:1.15; }
+  .detailStat span { display:block; margin-top:3px; color:var(--muted); font-size:10px; }
+  .detailSection { margin-top:14px; }
+  .detailSection h3 { margin:0 0 7px; font-size:12px; color:var(--text); }
+  .detailRows { display:grid; grid-template-columns:96px 1fr; gap:6px 10px; margin:0; font-size:12px; }
+  .detailRows dt { color:var(--muted); }
+  .detailRows dd { margin:0; font-weight:600; text-align:right; overflow-wrap:anywhere; }
+  .detailMember { padding:8px 0; border-top:1px dashed #e5e7eb; font-size:12px; }
+  .detailMember:first-of-type { border-top:0; }
+  .detailMember b { display:block; }
+  .detailMember small { color:var(--muted); }
+  .detailActions { display:flex; flex-wrap:wrap; gap:7px; margin-top:17px; }
+  .detailActions button { border:1px solid #d1d5db; border-radius:9px; background:#fff; color:var(--text); padding:7px 10px;
+                          font:600 12px system-ui; cursor:pointer; }
+  .detailActions button:hover { background:#f3f4f6; }
+  .detailActions button.primary { border-color:var(--primary); background:var(--primary); color:#fff; }
+  .detailActions button.primary:hover { background:#15803d; }
   /* chú giải */
   .legend { position:absolute; z-index:1000; bottom:44px; right:12px; background:rgba(255,255,255,.94);
             padding:10px 14px; font:12.5px system-ui; border-radius:var(--radius); box-shadow:var(--shadow);
@@ -144,6 +180,7 @@
     #idBox { top:226px !important; left:10px; width:calc(100% - 20px); }
     #listPanel, #statsPanel { top:268px; left:10px; width:calc(100% - 20px); max-height:55%; }
     #statsPanel { left:10px; }
+    #detailPanel { top:268px; left:10px; right:10px; width:auto; max-height:calc(100% - 356px); }
     #exportBtn { top:auto; bottom:76px; right:10px; padding:8px 10px; font-size:11.5px; }
     .legend { bottom:76px; left:10px; right:auto; max-width:240px; font-size:10.5px; padding:7px 9px; }
   }
@@ -202,6 +239,13 @@ Phạm Thị Ngọc Ánh | 11/05/1982 | Nữ | Tổ 3, ...
 <input id="idBox" placeholder="🆔 Nhập ID nhà (vd: LSN-H023) → Enter">
 <div id="listPanel"><h3>📋 Danh sách tổ & nhà</h3><div id="listBody"></div></div>
 <div id="statsPanel"><h3>📊 Thống kê theo tổ</h3><div id="statsBody"></div></div>
+<aside id="detailPanel" aria-live="polite" aria-label="Dữ liệu vùng được chọn">
+  <div id="detailHeader">
+    <div><span id="detailEyebrow" class="eyebrow">Dữ liệu vùng</span><h2 id="detailTitle">Chưa chọn vùng</h2><span id="detailSubtitle" class="subtitle">Nhấp vào nhà, tổ hoặc ranh giới thôn</span></div>
+    <button id="detailClose" title="Đóng bảng dữ liệu" aria-label="Đóng bảng dữ liệu">×</button>
+  </div>
+  <div id="detailBody"></div>
+</aside>
 <div id="bar"><b>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
   con trỏ: <span class="c" id="coord">–</span> · <span class="c" id="savedMsg"></span></div>
 <div class="legend">
@@ -485,6 +529,132 @@ function thonInfo(l) {
     '<button class="primary" onclick="renameThon(this)">✏️ Đổi tên</button> ' +
     '<button onclick="deleteThon(this)">🗑 Xóa</button></div>';
 }
+
+// ================= PANEL DỮ LIỆU THEO VÙNG =================
+let detailLayer = null;
+let detailKind = '';
+const detailPanel = document.getElementById('detailPanel');
+const detailBody = document.getElementById('detailBody');
+function detailStat(value, label) {
+  return '<div class="detailStat"><b>' + esc(value) + '</b><span>' + esc(label) + '</span></div>';
+}
+function regionKind(l) {
+  const type = props(l).type;
+  return type === 'to' ? 'to' : (type === 'thon' ? 'thon' : 'house');
+}
+function thonStats(l) {
+  const ring = l.getLatLngs()[0];
+  const result = {houses: 0, people: 0, filled: 0, tos: totLayer.getLayers().length};
+  drawn.eachLayer(h => {
+    if (!pointInRing(h.getBounds().getCenter(), ring)) return;
+    const p = props(h);
+    result.houses++;
+    result.people += num(p.members);
+    if (Array.isArray(p.members_list) && p.members_list.length) result.filled++;
+  });
+  return result;
+}
+function houseDetailMarkup(l) {
+  const p = props(l);
+  const members = Array.isArray(p.members_list) ? p.members_list : [];
+  const memberMarkup = members.length ? members.map(m =>
+    '<div class="detailMember"><b>' + (m.head ? '👑 ' : '') + esc(m.name || 'Chưa rõ tên') + '</b>' +
+    (m.head ? '<small>Chủ hộ</small><br>' : '') +
+    '<small>' + [m.dob, m.gender].filter(Boolean).map(esc).join(' · ') + '</small></div>').join('') :
+    '<div style="color:#6b7280;font-size:12px">Chưa có danh sách thành viên chi tiết.</div>';
+  return '<span class="detailBadge">HỘ DÂN</span>' +
+    '<span class="detailId">' + esc(p.fid || 'Chưa có ID') + '</span>' +
+    '<div class="detailStats">' + detailStat(p.members || '—', 'khẩu') + detailStat(p.elderly || '—', 'NCT') + detailStat(p.children || '—', 'trẻ em') + '</div>' +
+    '<section class="detailSection"><h3>Thông tin hộ</h3><dl class="detailRows">' +
+    '<dt>Chủ hộ</dt><dd>' + esc(p.name || 'Chưa có dữ liệu') + '</dd>' +
+    '<dt>Số nhà</dt><dd>' + esc(p['addr:housenumber'] || '—') + '</dd>' +
+    '<dt>Ghi chú</dt><dd>' + esc(p.note || '—') + '</dd></dl></section>' +
+    '<section class="detailSection"><h3>Thành viên (' + members.length + ')</h3>' + memberMarkup + '</section>' +
+    '<div class="detailActions"><button class="primary" data-detail-action="edit-house">✏️ Sửa thông tin</button><button data-detail-action="delete-house">🗑 Xóa nhà</button></div>';
+}
+function toDetailMarkup(l) {
+  const p = props(l);
+  const s = totStats(l);
+  return '<span class="detailBadge" style="background:#fef3c7;color:#92400e">TỔ DÂN CƯ</span>' +
+    '<div class="detailStats">' + detailStat(s.to, 'hộ dân') + detailStat(s.mem, 'khẩu') + detailStat(s.kid, 'trẻ em') + '</div>' +
+    '<section class="detailSection"><h3>Tổng hợp trong vùng</h3><dl class="detailRows">' +
+    '<dt>Người cao tuổi</dt><dd>' + s.eld + '</dd><dt>Ghi chú</dt><dd>' + esc(p.note || '—') + '</dd></dl></section>' +
+    '<div class="detailActions"><button class="primary" data-detail-action="rename-to">✏️ Đổi tên tổ</button><button data-detail-action="delete-to">🗑 Xóa tổ</button></div>';
+}
+function thonDetailMarkup(l) {
+  const p = props(l);
+  const s = thonStats(l);
+  const ring = l.getLatLngs()[0];
+  const center = l.getBounds().getCenter();
+  return '<span class="detailBadge" style="background:#fee2e2;color:#991b1b">RANH GIỚI THÔN</span>' +
+    '<div class="detailStats">' + detailStat(s.houses, 'hộ trong vùng') + detailStat(s.people, 'khẩu đã nhập') + detailStat(s.filled, 'hồ sơ đủ') + '</div>' +
+    '<section class="detailSection"><h3>Thông tin vùng</h3><dl class="detailRows">' +
+    '<dt>Diện tích</dt><dd>' + polyAreaM2(ring).toFixed(0) + ' m²</dd><dt>Tâm vùng</dt><dd>' + center.lat.toFixed(6) + ', ' + center.lng.toFixed(6) + '</dd></dl></section>' +
+    '<div class="detailActions"><button class="primary" data-detail-action="rename-thon">✏️ Đổi tên</button><button data-detail-action="delete-thon">🗑 Xóa ranh giới</button></div>';
+}
+function showDetail(kind, l) {
+  if (!l) return;
+  detailLayer = l;
+  detailKind = kind || regionKind(l);
+  map.closePopup();
+  document.getElementById('listPanel').style.display = 'none';
+  document.getElementById('statsPanel').style.display = 'none';
+  const p = props(l);
+  const titles = {house: ['Nhà & hộ dân', p.name || 'Chưa có chủ hộ'], to: ['Tổ dân cư', p.name || 'Tổ'], thon: ['Địa bàn', p.name || 'Ranh giới thôn']};
+  const title = titles[detailKind] || titles.house;
+  document.getElementById('detailEyebrow').textContent = title[0];
+  document.getElementById('detailTitle').textContent = title[1];
+  document.getElementById('detailSubtitle').textContent = detailKind === 'house' ? (p.fid || 'Nhà chưa có ID') : 'Nhấp vùng khác để chuyển dữ liệu';
+  detailBody.innerHTML = detailKind === 'house' ? houseDetailMarkup(l) : (detailKind === 'to' ? toDetailMarkup(l) : thonDetailMarkup(l));
+  detailPanel.classList.add('open');
+  if (l.bringToFront) l.bringToFront();
+}
+function closeDetail() {
+  detailPanel.classList.remove('open');
+  detailLayer = null;
+  detailKind = '';
+}
+function bindRegionClick(l) {
+  if (!l || l._detailBound) return;
+  l._detailBound = true;
+  l.on('click', e => {
+    if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+    showDetail(regionKind(l), l);
+  });
+}
+document.getElementById('detailClose').onclick = closeDetail;
+detailBody.addEventListener('click', ev => {
+  const button = ev.target.closest('[data-detail-action]');
+  const l = detailLayer;
+  if (!button || !l) return;
+  const action = button.dataset.detailAction;
+  if (action === 'edit-house') {
+    closeDetail();
+    l.setPopupContent(houseForm(l));
+    l.openPopup();
+  } else if (action === 'delete-house' && confirm('Xóa nhà này?')) {
+    drawn.removeLayer(l);
+    closeDetail();
+    saveState();
+  } else if (action === 'rename-to') {
+    const name = prompt('Tên tổ:', props(l).name || 'Tổ');
+    if (name !== null) { props(l).name = name; saveState(); showDetail('to', l); }
+  } else if (action === 'delete-to' && confirm('Xóa ranh giới tổ này?')) {
+    totLayer.removeLayer(l);
+    closeDetail();
+    saveState();
+  } else if (action === 'rename-thon') {
+    const name = prompt('Tên ranh giới thôn:', props(l).name || 'Ranh giới thôn');
+    if (name !== null) { props(l).name = name; saveState(); showDetail('thon', l); }
+  } else if (action === 'delete-thon' && confirm('Xóa ranh giới thôn?')) {
+    thonLayer.removeLayer(l);
+    closeDetail();
+    saveState();
+  }
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && detailPanel.classList.contains('open')) closeDetail();
+});
 function findThonLayer(el) {
   const pop = el.closest('.leaflet-popup');
   let l = null;
@@ -582,6 +752,7 @@ map.on(L.Draw.Event.CREATED, e => {
     layer.setPopupContent(houseForm(layer));  // mở thẳng form nhập khi vẽ xong
     layer.openPopup();
   }
+  bindRegionClick(layer);
   saveState();
 });
 map.on(L.Draw.Event.EDITED, saveState);
@@ -610,6 +781,7 @@ function addFeature(f) {
   const l = L.polygon(ring);
   l.feature = f;
   l.uid = uid++;
+  bindRegionClick(l);
   noteHouseId(f);
   if (f.properties && f.properties.type === 'to') {
     // Giữ màu đã lưu nếu chưa ai dùng; trùng thì đổi màu mới (tự sửa dữ liệu cũ)
@@ -723,9 +895,9 @@ function refreshList() {
   document.getElementById('btnList').textContent = '📋 Danh sách (' + rows.length + ')';
 }
 window.gotoItem = function(uid) {
-  thonLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); t.openPopup(); } });
-  totLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); t.openPopup(); } });
-  drawn.eachLayer(l => { if (l.uid === uid) { map.flyTo(l.getBounds().getCenter(), 19); l.openPopup(); } });
+  thonLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); showDetail('thon', t); } });
+  totLayer.eachLayer(t => { if (t.uid === uid) { map.flyTo(t.getBounds().getCenter(), 16); showDetail('to', t); } });
+  drawn.eachLayer(l => { if (l.uid === uid) { map.flyTo(l.getBounds().getCenter(), 19); showDetail('house', l); } });
 };
 document.getElementById('btnList').onclick = () => {
   const p = document.getElementById('listPanel');
@@ -787,7 +959,8 @@ function mocPopup(m) {
     '<br><button onclick="this.parentNode.remove(); saveState();">Xóa mốc</button>';
 }
 map.on('click', e => {
-  if (!mocMode) return;
+  if (!mocMode) { closeDetail(); return; }
+  closeDetail();
   const name = prompt('Tên mốc (mặc định: Nhà Văn Hóa Thôn Lệ Sơn Nam):', 'Nhà Văn Hóa Thôn Lệ Sơn Nam');
   if (name === null) return;
   const m = L.circleMarker(e.latlng, {radius: 12, color: '#e67e22', weight: 3, fillColor: '#ffe08a', fillOpacity: .9})
@@ -857,8 +1030,7 @@ window.applyFill = function() {
   p.note = members[0].address || p.note || '';
   saveState();
   map.flyTo(layer.getBounds().getCenter(), 19);
-  layer.setPopupContent(houseInfo(layer));
-  layer.openPopup();
+  showDetail('house', layer);
   res.innerHTML = '<b style="color:#16a34a">✅ Đã nạp vào ' + id + ':</b> ' + members.length + ' thành viên · ' +
     p.elderly + ' NCT · ' + p.children + ' trẻ em · Chủ hộ: ' + p.name +
     '<br><span style="color:#888">Xem chi tiết trong popup nhà; bấm 💾 Lưu về máy để ghi ra file.</span>';
@@ -900,8 +1072,7 @@ function focusHouse(l) {
   searchResults.innerHTML = '';
   searchResults.style.display = 'none';
   map.flyTo(l.getBounds().getCenter(), 19, {duration: .7});
-  l.setPopupContent(houseInfo(l));
-  l.openPopup();
+  showDetail('house', l);
   document.getElementById('savedMsg').textContent = '📍 ' + (props(l).fid || 'Nhà');
 }
 const searchBox = document.getElementById('searchBox');
