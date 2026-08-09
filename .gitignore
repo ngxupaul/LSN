@@ -7,3 +7,4 @@ ai/*.pth
 ai/diag.py
 ai/diag2.py
 /tmp/
+backups/latest-drawn.json
