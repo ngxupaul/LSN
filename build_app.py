@@ -151,7 +151,7 @@ PAGE = """<!DOCTYPE html>
 <div id="listPanel"><h3>📋 Danh sách tổ & nhà</h3><div id="listBody"></div></div>
 <div id="statsPanel"><h3>📊 Thống kê theo tổ</h3><div id="statsBody"></div></div>
 <div id="bar"><b>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam + Lệ Sơn Bắc</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
-  con trỏ: <span class="c" id="coord">–</span></div>
+  con trỏ: <span class="c" id="coord">–</span> · <span class="c" id="savedMsg"></span></div>
 <div class="legend">
   <i style="background:#00a651"></i> Nhà ở<br>
   <i style="background:linear-gradient(90deg,#e67e22,#2980b9,#27ae60,#8e44ad,#c0392b);border:1px solid #555"></i> Ranh giới tổ (mỗi tổ 1 màu)<br>
@@ -465,6 +465,13 @@ map.on(L.Draw.Event.EDITED, saveState);
 map.on(L.Draw.Event.DELETED, saveState);
 
 // ================= LƯU / KHÔI PHỤC =================
+// ---- LƯU / KHÔI PHỤC (bảo đảm với mọi loại hình vẽ: polygon, rectangle) ----
+// Lấy vòng ngoài của polygon (xử lý cả _latlngs lồng lẫn phẳng)
+function ringCoords(l) {
+  const ll = l.getLatLngs();
+  const ring = (Array.isArray(ll[0]) && ll[0].length && ll[0][0].lat !== undefined) ? ll[0] : ll;
+  return ring.map(p => [p.lng, p.lat]);
+}
 function addFeature(f) {
   if (f.geometry.type === 'Point') {
     const [lon, lat] = f.geometry.coordinates;
@@ -474,7 +481,9 @@ function addFeature(f) {
     m.name = (f.properties && f.properties.name) || 'Mốc';
     return;
   }
-  const l = L.geoJSON(f).getLayers()[0];
+  // Tạo polygon tường minh từ tọa độ (không phụ thuộc L.geoJSON)
+  const ring = f.geometry.coordinates[0].map(c => [c[1], c[0]]);
+  const l = L.polygon(ring);
   l.feature = f;
   l.uid = uid++;
   if (f.properties && f.properties.type === 'to') {
@@ -495,30 +504,30 @@ function addFeature(f) {
 function collectAll() {
   const features = [];
   thonLayer.eachLayer(t => {
-    const g = t.toGeoJSON();
     const p = props(t);
-    g.properties = Object.assign({}, g.properties, {type: 'thon', name: p.name || 'Ranh giới thôn', note: p.note || 'Ranh giới thôn (vẽ tay)'});
-    features.push(g);
+    features.push({type: 'Feature',
+      properties: {type: 'thon', name: p.name || 'Ranh giới thôn', note: p.note || 'Ranh giới thôn (vẽ tay)'},
+      geometry: {type: 'Polygon', coordinates: [ringCoords(t)]}});
   });
   totLayer.eachLayer(t => {
-    const g = t.toGeoJSON();
     const p = props(t);
-    g.properties = Object.assign({}, g.properties, {type: 'to', name: p.name || 'Tổ', note: p.note || 'Ranh giới tổ dân cư (vẽ tay)', color: p.color});
-    features.push(g);
+    features.push({type: 'Feature',
+      properties: {type: 'to', name: p.name || 'Tổ', note: p.note || 'Ranh giới tổ dân cư (vẽ tay)', color: p.color},
+      geometry: {type: 'Polygon', coordinates: [ringCoords(t)]}});
   });
   drawn.eachLayer(l => {
-    const g = l.toGeoJSON();
     const p = props(l);
-    g.properties = Object.assign({}, g.properties, {
-      name: p.name || undefined,
-      'addr:housenumber': p['addr:housenumber'] || undefined,
-      members: p.members || undefined,
-      elderly: p.elderly || undefined,
-      children: p.children || undefined,
-      note: p.note || undefined,
-      source: 'vẽ tay từ ảnh vệ tinh – thôn Lệ Sơn Nam'
-    });
-    features.push(g);
+    features.push({type: 'Feature',
+      properties: {
+        name: p.name || undefined,
+        'addr:housenumber': p['addr:housenumber'] || undefined,
+        members: p.members || undefined,
+        elderly: p.elderly || undefined,
+        children: p.children || undefined,
+        note: p.note || undefined,
+        source: 'vẽ tay từ ảnh vệ tinh – thôn Lệ Sơn Nam'
+      },
+      geometry: {type: 'Polygon', coordinates: [ringCoords(l)]}});
   });
   mocLayer.eachLayer(m => {
     const ll = m.getLatLng();
@@ -529,7 +538,10 @@ function collectAll() {
   return features;
 }
 function saveState() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(collectAll())); } catch (e) {}
+  let ok = false;
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(collectAll())); ok = true; } catch (e) { console.error('Lưu thất bại:', e); }
+  const sm = document.getElementById('savedMsg');
+  if (sm) sm.textContent = ok ? ('💾 Đã lưu ' + new Date().toLocaleTimeString('vi-VN')) : '⚠️ Lưu thất bại';
   refreshList();
   refreshStats();
 }
