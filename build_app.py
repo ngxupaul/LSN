@@ -37,7 +37,7 @@ PAGE = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam</title>
+<title>Lệ Sơn Nam Smart Village – Bản đồ số</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
 <style>
@@ -50,6 +50,19 @@ PAGE = """<!DOCTYPE html>
   * { box-sizing: border-box; }
   html, body { height:100%; margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; color:var(--text); }
   #map { height:100%; }
+  #brandBar { position:absolute; z-index:1000; top:12px; left:56px; right:160px; min-height:46px;
+              display:flex; align-items:center; gap:10px; padding:7px 12px; border:1px solid rgba(229,231,235,.95);
+              border-radius:14px; background:rgba(255,255,255,.94); box-shadow:var(--shadow); backdrop-filter:blur(10px); }
+  #brandBar .mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border-radius:10px;
+                    background:linear-gradient(135deg,#166534,#16a34a); color:#fff; font:800 10px/1 system-ui; letter-spacing:.5px; }
+  #brandBar .title { min-width:178px; }
+  #brandBar .title strong { display:block; font-size:13px; letter-spacing:.1px; }
+  #brandBar .title span { display:block; color:var(--muted); font-size:10.5px; margin-top:2px; }
+  #quickStats { display:flex; align-items:center; gap:6px; margin-left:auto; }
+  #quickStats .kpi { min-width:66px; padding:4px 8px; border-left:1px solid var(--line); }
+  #quickStats .kpi b { display:block; color:#166534; font-size:15px; line-height:1.1; }
+  #quickStats .kpi span { color:var(--muted); font-size:10px; white-space:nowrap; }
+  #seedStatus { color:#166534; background:#ecfdf5; border:1px solid #bbf7d0; border-radius:999px; padding:4px 8px; font-size:10.5px; white-space:nowrap; }
   /* thanh trạng thái */
   #bar { position:absolute; z-index:1000; bottom:0; left:0; right:0;
          background:linear-gradient(90deg,#14532d,#166534 55%,#15803d);
@@ -65,8 +78,8 @@ PAGE = """<!DOCTYPE html>
                box-shadow:0 4px 12px rgba(22,163,74,.35); transition:transform .12s; }
   #exportBtn:hover { transform:translateY(-1px); }
   /* thanh công cụ */
-  #tools { position:absolute; z-index:1000; top:12px; left:56px; display:flex; align-items:center;
-           gap:2px; flex-wrap:wrap; max-width:700px;
+  #tools { position:absolute; z-index:1000; top:70px; left:56px; display:flex; align-items:center;
+           gap:2px; flex-wrap:wrap; max-width:calc(100% - 72px);
            background:rgba(255,255,255,.94); border:1px solid var(--line); border-radius:var(--radius);
            padding:5px 6px; box-shadow:var(--shadow); backdrop-filter:blur(8px); }
   #tools .sep { width:1px; height:22px; background:var(--line); margin:0 4px; }
@@ -78,16 +91,23 @@ PAGE = """<!DOCTYPE html>
   #tools button.danger:hover { background:#fef2f2; color:var(--danger); }
   /* bộ lọc */
   /* ô tìm kiếm */
-  #searchBox { position:absolute; z-index:1000; top:108px; left:56px; width:300px;
+  #searchBox { position:absolute; z-index:1000; top:126px; left:56px; width:320px;
                font:13px system-ui; padding:9px 12px; border:1px solid var(--line); border-radius:12px;
                box-shadow:var(--shadow); outline:none; transition:border .15s; }
   #searchBox:focus { border-color:var(--primary); }
-  #idBox { position:absolute; z-index:1000; top:146px; left:56px; width:300px;
+  #searchResults { position:absolute; z-index:1100; top:164px; left:56px; width:320px; max-height:280px; overflow:auto;
+                  display:none; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); }
+  #searchResults .result { padding:9px 12px; border-bottom:1px solid #f3f4f6; cursor:pointer; font-size:12.5px; }
+  #searchResults .result:last-child { border-bottom:0; }
+  #searchResults .result:hover { background:#f0fdf4; }
+  #searchResults .result b { color:#166534; }
+  #searchResults .result small { display:block; color:var(--muted); margin-top:2px; }
+  #idBox { position:absolute; z-index:1000; top:204px; left:56px; width:320px;
            font:13px system-ui; padding:9px 12px; border:1px solid var(--line); border-radius:12px;
            box-shadow:var(--shadow); outline:none; }
   #idBox:focus { border-color:#7c3aed; }
   /* bảng danh sách + thống kê */
-  #listPanel, #statsPanel { position:absolute; z-index:1000; top:150px; left:56px; width:360px; max-height:62%;
+  #listPanel, #statsPanel { position:absolute; z-index:1000; top:244px; left:56px; width:360px; max-height:62%;
                background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
                box-shadow:var(--shadow); display:none; overflow-y:auto; font:13px system-ui; }
   #statsPanel { left:428px; }
@@ -137,10 +157,45 @@ PAGE = """<!DOCTYPE html>
   ::-webkit-scrollbar { width:9px; height:9px; }
   ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:8px; }
   ::-webkit-scrollbar-thumb:hover { background:#9ca3af; }
+  @media (max-width:980px) {
+    #quickStats .kpi:nth-child(n+3) { display:none; }
+    #brandBar { right:148px; }
+    #brandBar .title { min-width:150px; }
+  }
+  @media (max-width:760px) {
+    #brandBar { top:8px; left:10px; right:10px; padding:6px 8px; }
+    #brandBar .title { min-width:0; }
+    #brandBar .title strong { font-size:12px; }
+    #brandBar .title span { display:none; }
+    #quickStats { display:none; }
+    #seedStatus { margin-left:auto; font-size:9.5px; }
+    #tools { top:64px; left:10px; right:10px; max-width:none; padding:4px; max-height:none; overflow-x:auto; overflow-y:hidden; flex-wrap:nowrap; scrollbar-width:none; }
+    #tools::-webkit-scrollbar { display:none; }
+    #tools button, #tools .sep { flex:none; }
+    #tools button { padding:6px 8px; font-size:11.5px; }
+    #searchBox { top:148px; left:10px; width:calc(100% - 20px); }
+    #searchResults { top:186px; left:10px; width:calc(100% - 20px); }
+    #idBox { top:226px !important; left:10px; width:calc(100% - 20px); }
+    #listPanel, #statsPanel { top:268px; left:10px; width:calc(100% - 20px); max-height:55%; }
+    #statsPanel { left:10px; }
+    #exportBtn { top:auto; bottom:76px; right:10px; padding:8px 10px; font-size:11.5px; }
+    .legend { bottom:76px; left:10px; right:auto; max-width:240px; font-size:10.5px; padding:7px 9px; }
+  }
 </style>
 </head>
 <body>
 <div id="map"></div>
+<div id="brandBar" aria-label="Tổng quan dữ liệu thôn">
+  <div class="mark">LSN</div>
+  <div class="title"><strong>Lệ Sơn Nam Smart Village</strong><span>Quản lý nhân hộ khẩu trên bản đồ số</span></div>
+  <div id="quickStats">
+    <div class="kpi"><b id="quickHouses">–</b><span>hộ dân</span></div>
+    <div class="kpi"><b id="quickPeople">–</b><span>khẩu đã nhập</span></div>
+    <div class="kpi"><b id="quickFilled">–</b><span>hồ sơ đủ</span></div>
+    <div class="kpi"><b id="quickTos">–</b><span>tổ dân cư</span></div>
+  </div>
+  <span id="seedStatus">Đang tải dữ liệu…</span>
+</div>
 <div id="tools">
   <button id="btnMode" title="Xoay vòng chế độ vẽ: nhà → tổ → ranh giới thôn">🏘 Vẽ nhà</button>
   <span class="sep"></span>
@@ -176,11 +231,12 @@ Phạm Thị Ngọc Ánh | 11/05/1982 | Nữ | Tổ 3, ...
   </div>
 </div>
 <input type="file" id="fileImport" accept=".geojson,.json" style="display:none">
-<input id="searchBox" placeholder="🔍 Tìm kiếm (vd: nhà văn hóa, ĐH409...) — Enter">
-<input id="idBox" placeholder="🆔 Nhập ID nhà (vd: LSN-H023) → Enter" style="top:146px">
+<input id="searchBox" placeholder="🔍 Tìm chủ hộ, thành viên hoặc địa danh…" autocomplete="off">
+<div id="searchResults" role="listbox"></div>
+<input id="idBox" placeholder="🆔 Nhập ID nhà (vd: LSN-H023) → Enter">
 <div id="listPanel"><h3>📋 Danh sách tổ & nhà</h3><div id="listBody"></div></div>
 <div id="statsPanel"><h3>📊 Thống kê theo tổ</h3><div id="statsBody"></div></div>
-<div id="bar"><b>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam + Lệ Sơn Bắc</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
+<div id="bar"><b>Quản lý nhà & tổ dân cư – Thôn Lệ Sơn Nam</b> · Hòa Tiến, Hòa Vang, Đà Nẵng ·
   con trỏ: <span class="c" id="coord">–</span> · <span class="c" id="savedMsg"></span></div>
 <div class="legend">
   <i style="background:#00a651"></i> Nhà ở<br>
@@ -259,6 +315,61 @@ let houseSeq = 0;   // bộ đếm ID nhà (LSN-H001...)
 function props(l) { return (l.feature && l.feature.properties) || {}; }
 function esc(s) { return String(s == null ? '' : s).replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 function num(v) { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
+const SEED_DATA_URL = 'backups/le-son-nam-2026-08-09-69nha-6fill.json';
+function featureId(f) {
+  const p = f && f.properties || {};
+  if (p.type === 'to' || p.type === 'thon' || (f && f.geometry && f.geometry.type === 'Point')) return '';
+  return String(p.fid || (f && f.id) || '').trim().toUpperCase();
+}
+function featureScore(f) {
+  const p = f && f.properties || {};
+  return (Array.isArray(p.members_list) ? p.members_list.length * 10 : 0) +
+    (p.name ? 3 : 0) + (p.members != null ? 1 : 0) + (p.note ? 1 : 0);
+}
+function dedupeFeatures(features) {
+  const result = [], positions = new Map(), signatures = new Map();
+  let nextId = 0;
+  (features || []).forEach(f => {
+    const match = featureId(f).match(/^LSN-H(\d+)$/);
+    if (match) nextId = Math.max(nextId, Number(match[1]));
+  });
+  (features || []).forEach(f => {
+    if (!f || !f.geometry) return;
+    let id = featureId(f);
+    if (!id) { result.push(f); return; }
+    if (!positions.has(id)) {
+      positions.set(id, result.length);
+      signatures.set(id, JSON.stringify(f.geometry));
+      result.push(f);
+      return;
+    }
+    const index = positions.get(id);
+    const signature = JSON.stringify(f.geometry);
+    if (signature === signatures.get(id)) {
+      if (featureScore(f) > featureScore(result[index])) result[index] = f;
+      return;
+    }
+    do { nextId++; id = 'LSN-H' + String(nextId).padStart(3, '0'); } while (positions.has(id));
+    f = Object.assign({}, f, {id: id, properties: Object.assign({}, f.properties || {}, {fid: id})});
+    positions.set(id, result.length);
+    signatures.set(id, signature);
+    result.push(f);
+  });
+  return result;
+}
+function noteHouseId(f) {
+  const id = featureId(f);
+  const match = id.match(/^LSN-H(\d+)$/);
+  if (match) houseSeq = Math.max(houseSeq, Number(match[1]));
+}
+function setSeedStatus(text, ok) {
+  const el = document.getElementById('seedStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = ok ? '#166534' : '#92400e';
+  el.style.background = ok ? '#ecfdf5' : '#fffbeb';
+  el.style.borderColor = ok ? '#bbf7d0' : '#fde68a';
+}
 
 // ================= VẼ (nhà ↔ tổ) =================
 const houseDrawControl = new L.Control.Draw({
@@ -519,6 +630,7 @@ function ringCoords(l) {
   return ring.map(p => [p.lng, p.lat]);
 }
 function addFeature(f) {
+  if (!f || !f.geometry) return;
   if (f.geometry.type === 'Point') {
     const [lon, lat] = f.geometry.coordinates;
     const m = L.circleMarker([lat, lon], {radius: 12, color: '#e67e22', weight: 3, fillColor: '#ffe08a', fillOpacity: .9})
@@ -532,6 +644,7 @@ function addFeature(f) {
   const l = L.polygon(ring);
   l.feature = f;
   l.uid = uid++;
+  noteHouseId(f);
   if (f.properties && f.properties.type === 'to') {
     // Giữ màu đã lưu nếu chưa ai dùng; trùng thì đổi màu mới (tự sửa dữ liệu cũ)
     let color = f.properties.color;
@@ -599,10 +712,24 @@ function saveState() {
   refreshList();
   refreshStats();
 }
-function restoreState() {
+async function restoreState() {
   let features = [];
+  let source = 'workspace';
   try { features = JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch (e) { features = []; }
-  features.forEach(addFeature);
+  if (!Array.isArray(features) || !features.length) {
+    try {
+      const res = await fetch(SEED_DATA_URL, {cache: 'no-store'});
+      if (!res.ok) throw new Error('seed ' + res.status);
+      const seed = await res.json();
+      features = seed.features || [];
+      source = 'demo backup';
+    } catch (e) {
+      features = [];
+      source = 'trống';
+    }
+  }
+  dedupeFeatures(features).forEach(addFeature);
+  setSeedStatus(source === 'demo backup' ? 'Dữ liệu mẫu 2026-08-09' : (features.length ? 'Dữ liệu đã lưu' : 'Chưa có dữ liệu'), !!features.length);
 }
 
 // ================= DANH SÁCH =================
@@ -636,7 +763,7 @@ window.gotoItem = function(uid) {
 };
 document.getElementById('btnList').onclick = () => {
   const p = document.getElementById('listPanel');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  p.style.display = getComputedStyle(p).display === 'none' ? 'block' : 'none';
   refreshList();
 };
 
@@ -661,6 +788,11 @@ function refreshStats() {
   });
   if (out.to > 0) rows.push({name: 'Chưa phân tổ', to: out.to, mem: out.mem, eld: out.eld, kid: out.kid});
   tot.to += out.to; tot.mem += out.mem; tot.eld += out.eld; tot.kid += out.kid;
+  const complete = drawn.getLayers().filter(l => Array.isArray(props(l).members_list) && props(l).members_list.length).length;
+  document.getElementById('quickHouses').textContent = drawn.getLayers().length;
+  document.getElementById('quickPeople').textContent = tot.mem;
+  document.getElementById('quickFilled').textContent = complete;
+  document.getElementById('quickTos').textContent = totLayer.getLayers().length;
 
   const tr = r => '<tr><td>' + r.name + '</td><td>' + r.to + '</td><td>' + r.mem + '</td><td>' + r.eld + '</td><td>' + r.kid + '</td></tr>';
   document.getElementById('statsBody').innerHTML =
@@ -670,7 +802,7 @@ function refreshStats() {
 }
 document.getElementById('btnStats').onclick = () => {
   const p = document.getElementById('statsPanel');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  p.style.display = getComputedStyle(p).display === 'none' ? 'block' : 'none';
   refreshStats();
 };
 
@@ -774,9 +906,7 @@ document.getElementById('idBox').addEventListener('keydown', ev => {
   let found = null;
   drawn.eachLayer(l => { const p = props(l); if (p.fid && p.fid.toUpperCase() === q) found = l; });
   if (found) {
-    map.flyTo(found.getBounds().getCenter(), 19);
-    found.setPopupContent(houseInfo(found));
-    found.openPopup();
+    focusHouse(found);
     document.getElementById('savedMsg').textContent = '🆔 ' + q;
   } else {
     alert('Không tìm thấy nhà có ID ' + q + '. Bấm vào nhà trên bản đồ để xem ID.');
@@ -784,18 +914,64 @@ document.getElementById('idBox').addEventListener('keydown', ev => {
 });
 
 // ================= TÌM KIẾM =================
-document.getElementById('searchBox').addEventListener('keydown', ev => {
+function normalizeText(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+function searchableHouseText(l) {
+  const p = props(l);
+  return [p.fid, p.name, p.note].concat((p.members_list || []).map(m => m.name)).join(' ');
+}
+function localHouseMatches(query) {
+  const q = normalizeText(query.trim());
+  if (!q) return [];
+  const matches = [];
+  drawn.eachLayer(l => { if (normalizeText(searchableHouseText(l)).includes(q)) matches.push(l); });
+  return matches.slice(0, 8);
+}
+function focusHouse(l) {
+  if (!l) return;
+  searchBox.value = '';
+  searchResults.innerHTML = '';
+  searchResults.style.display = 'none';
+  map.flyTo(l.getBounds().getCenter(), 19, {duration: .7});
+  l.setPopupContent(houseInfo(l));
+  l.openPopup();
+  document.getElementById('savedMsg').textContent = '📍 ' + (props(l).fid || 'Nhà');
+}
+const searchBox = document.getElementById('searchBox');
+const searchResults = document.getElementById('searchResults');
+searchBox.addEventListener('input', ev => {
+  const hits = localHouseMatches(ev.target.value);
+  if (!ev.target.value.trim()) { searchResults.style.display = 'none'; return; }
+  searchResults.innerHTML = hits.length ? hits.map(l => {
+    const p = props(l);
+    return '<div class="result" data-uid="' + l.uid + '" role="option"><b>🏠 ' + esc(p.fid || 'Nhà') + '</b> · ' + esc(p.name || 'Chưa có chủ hộ') +
+      '<small>' + (p.members_list && p.members_list.length ? p.members_list.length + ' thành viên có hồ sơ' : (p.members || 0) + ' nhân khẩu') + '</small></div>';
+  }).join('') : '<div class="result" style="color:#6b7280">Không có hồ sơ nội bộ · nhấn Enter để tìm địa danh</div>';
+  searchResults.querySelectorAll('.result[data-uid]').forEach(row => {
+    row.onclick = () => { const l = [...drawn.getLayers()].find(x => String(x.uid) === row.dataset.uid); focusHouse(l); };
+  });
+  searchResults.style.display = 'block';
+});
+searchBox.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') { searchResults.style.display = 'none'; return; }
   if (ev.key !== 'Enter') return;
+  const local = localHouseMatches(ev.target.value);
+  if (local.length) { focusHouse(local[0]); return; }
   const q = ev.target.value.trim();
   if (!q) return;
   fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q + ' Hòa Tiến Hòa Vang Đà Nẵng'), {headers: {Accept: 'application/json'}})
     .then(r => r.json())
     .then(res => {
-      if (!res.length) { alert('Không tìm thấy.'); return; }
+      if (!res.length) { alert('Không tìm thấy địa danh.'); return; }
       map.flyTo([parseFloat(res[0].lat), parseFloat(res[0].lon)], 17);
-      L.popup().setLatLng([res[0].lat, res[0].lon]).setContent('<b>' + res[0].display_name + '</b>').openOn(map);
+      L.popup().setLatLng([res[0].lat, res[0].lon]).setContent('<b>' + esc(res[0].display_name) + '</b>').openOn(map);
+      searchResults.style.display = 'none';
     })
-    .catch(() => alert('Lỗi kết nối tìm kiếm.'));
+    .catch(() => alert('Không thể tìm địa danh lúc này.'));
+});
+document.addEventListener('click', ev => {
+  if (ev.target !== searchBox && !searchResults.contains(ev.target)) searchResults.style.display = 'none';
 });
 
 // ================= HƯỚNG DẪN =================
@@ -823,9 +999,13 @@ document.getElementById('fileImport').addEventListener('change', ev => {
       const data = JSON.parse(reader.result);
       const feats = data.features || (data.type === 'Feature' ? [data] : []);
       if (!feats.length) { alert('File không có đối tượng nào.'); return; }
-      feats.forEach(addFeature);
+      dedupeFeatures(feats).forEach(f => {
+        const id = featureId(f);
+        if (id) drawn.eachLayer(l => { if (featureId(l.feature) === id) drawn.removeLayer(l); });
+        addFeature(f);
+      });
       saveState();
-      alert('Đã import ' + feats.length + ' đối tượng.');
+      alert('Đã import ' + dedupeFeatures(feats).length + ' đối tượng, tự hợp nhất các ID trùng.');
     } catch (e) { alert('File GeoJSON không hợp lệ: ' + e.message); }
   };
   reader.readAsText(file);
@@ -865,9 +1045,14 @@ document.getElementById('btnClear').onclick = () => {
 };
 
 // ================= KHỞI TẠO =================
-restoreState();
-refreshList();
-refreshStats();
+restoreState().then(() => {
+  refreshList();
+  refreshStats();
+}).catch(() => {
+  setSeedStatus('Chưa có dữ liệu', false);
+  refreshList();
+  refreshStats();
+});
 map.on('mousemove', e => {
   document.getElementById('coord').textContent = e.latlng.lat.toFixed(6) + ', ' + e.latlng.lng.toFixed(6);
 });
