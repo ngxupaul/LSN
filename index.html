@@ -108,6 +108,7 @@
   <span class="sep"></span>
   <button id="btnMoc" title="Đặt mốc">📌 Đặt mốc</button>
   <button id="btnImport" title="Nạp file GeoJSON">📂 Import</button>
+  <button id="btnSaveSrv" title="Lưu toàn bộ dữ liệu (nhà + tổ + ranh giới thôn) về máy">💾 Lưu về máy</button>
   <button id="btnDelTo" class="danger" title="Xóa toàn bộ ranh giới tổ (giữ nhà + mốc)">🗑 Xóa tổ</button>
   <button id="btnClear" class="danger" title="Xóa toàn bộ dữ liệu">🗑 Xóa hết</button>
   <button id="btnHelp">❓ Hướng dẫn</button>
@@ -180,6 +181,13 @@ const totLayer = L.featureGroup().addTo(map);   // tổ
 // Bảng màu cho từng tổ (mỗi tổ 1 màu riêng, lặp lại khi quá 12 tổ)
 const TO_COLORS = ['#e67e22', '#2980b9', '#27ae60', '#8e44ad', '#c0392b', '#16a085',
                    '#d35400', '#2c3e50', '#7d6608', '#5dade2', '#e84393', '#00b894'];
+// Chọn màu CHƯA có tổ nào đang dùng (tránh trùng khi xóa tổ giữa chừng)
+function nextToColor() {
+  const used = new Set();
+  totLayer.eachLayer(t => { const c = props(t).color; if (c) used.add(c); });
+  for (const c of TO_COLORS) { if (!used.has(c)) return c; }
+  return TO_COLORS[totLayer.getLayers().length % TO_COLORS.length];
+}
 function toColor(n) { return TO_COLORS[n % TO_COLORS.length]; }
 const mocLayer = L.featureGroup().addTo(map);   // mốc
 let uid = 1;
@@ -409,7 +417,7 @@ map.on(L.Draw.Event.CREATED, e => {
     layer.openPopup();
   } else if (drawMode === 'to') {
     const name = prompt('Tên tổ (vd: Tổ 1, Tổ 2, Khu dân cư...):', 'Tổ ' + (totLayer.getLayers().length + 1));
-    const color = toColor(totLayer.getLayers().length);
+    const color = nextToColor();
     layer.feature = {type: 'Feature', properties: {name: (name || 'Tổ'), type: 'to', note: '', color: color}};
     layer.uid = uid++;
     layer.setStyle({color: color, weight: 2.5, fillColor: color, fillOpacity: .3});
@@ -453,7 +461,11 @@ function addFeature(f) {
   l.feature = f;
   l.uid = uid++;
   if (f.properties && f.properties.type === 'to') {
-    const color = f.properties.color || toColor(totLayer.getLayers().length);
+    // Giữ màu đã lưu nếu chưa ai dùng; trùng thì đổi màu mới (tự sửa dữ liệu cũ)
+    let color = f.properties.color;
+    let dup = false;
+    totLayer.eachLayer(t => { if (t !== l && props(t).color === color) dup = true; });
+    if (!color || dup) color = nextToColor();
     f.properties.color = color;
     l.setStyle({color: color, weight: 2.5, fillColor: color, fillOpacity: .3});
     l.bindPopup(function(l) { return toInfo(l); });
@@ -665,6 +677,22 @@ document.getElementById('fileImport').addEventListener('change', ev => {
 });
 
 // ================= XÓA TỔ / XÓA HẾT =================
+document.getElementById('btnSaveSrv').onclick = async () => {
+  const feats = collectAll();
+  if (!feats.length) { alert('Chưa có dữ liệu.'); return; }
+  const payload = {type: 'FeatureCollection', features: feats,
+    savedAt: new Date().toISOString(), meta: 'Lệ Sơn Nam - nhà + tổ + ranh giới thôn'};
+  try {
+    const res = await fetch('/api/save', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+    const j = await res.json();
+    if (j.ok) {
+      const nTo = feats.filter(f => f.properties && f.properties.type === 'to').length;
+      const nThon = feats.filter(f => f.properties && f.properties.type === 'thon').length;
+      const nNha = feats.filter(f => f.geometry.type === 'Polygon' && !(f.properties && (f.properties.type === 'to' || f.properties.type === 'thon'))).length;
+      alert('✅ Đã lưu về máy: ' + nNha + ' nhà · ' + nTo + ' tổ · ' + nThon + ' ranh giới thôn');
+    } else { alert('Lỗi server: ' + (j.error || '')); }
+  } catch (e) { alert('Không kết nối được máy chủ (chạy server.py trước).'); }
+};
 document.getElementById('btnDelTo').onclick = () => {
   if (!totLayer.getLayers().length) { alert('Chưa có ranh giới tổ nào.'); return; }
   if (!confirm('Xóa toàn bộ ranh giới tổ đã vẽ? (giữ nguyên nhà + mốc)')) return;
