@@ -1,0 +1,45 @@
+{
+  "source": {
+    "type": "image_table",
+    "file": "codex-clipboard-afc70cb8-fa93-46f4-af5f-71aaf5233b51.png",
+    "captured_at": "2026-08-09",
+    "contains_personal_data": true
+  },
+  "households": [
+    {
+      "geojson_id": "LSN-H067",
+      "household_number": "7",
+      "address": "Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng",
+      "members": [
+        {
+          "sequence": 1,
+          "name": "Nguyễn Đức Hùng",
+          "date_of_birth": "1977-09-27",
+          "date_of_birth_display": "27/09/1977",
+          "gender": "Nam"
+        },
+        {
+          "sequence": 2,
+          "name": "Phạm Thị Ngọc Ánh",
+          "date_of_birth": "1982-05-11",
+          "date_of_birth_display": "11/05/1982",
+          "gender": "Nữ"
+        },
+        {
+          "sequence": 3,
+          "name": "Nguyễn Đức Hùng Vương",
+          "date_of_birth": "2008-03-06",
+          "date_of_birth_display": "06/03/2008",
+          "gender": "Nam"
+        },
+        {
+          "sequence": 4,
+          "name": "Nguyễn Ngọc Vương Nhi",
+          "date_of_birth": "2015-07-03",
+          "date_of_birth_display": "03/07/2015",
+          "gender": "Nữ"
+        }
+      ]
+    }
+  ]
+}

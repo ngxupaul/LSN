@@ -131,6 +131,9 @@ PAGE = """<!DOCTYPE html>
                   border:1px solid #d1d5db; border-radius:7px; padding:5px 7px; font:13px system-ui;
                   outline:none; margin:2px 0; }
   .leaflet-popup-content input:focus, .leaflet-popup-content select:focus { border-color:var(--primary); }
+  .btn2 { padding:7px 14px; border:none; border-radius:9px; cursor:pointer; font:600 13px system-ui; background:var(--primary); color:#fff; }
+  .btn2.gray { background:#f3f4f6; color:var(--text); }
+  #fillModal .btn2 { margin-right:6px; }
   ::-webkit-scrollbar { width:9px; height:9px; }
   ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:8px; }
   ::-webkit-scrollbar-thumb:hover { background:#9ca3af; }
@@ -146,10 +149,31 @@ PAGE = """<!DOCTYPE html>
   <span class="sep"></span>
   <button id="btnMoc" title="Đặt mốc">📌 Đặt mốc</button>
   <button id="btnImport" title="Nạp file GeoJSON">📂 Import</button>
+  <button id="btnFill" title="Dán dữ liệu thành viên theo ID nhà (lấy từ Click nhà)">📥 Đổ dữ liệu theo ID</button>
   <button id="btnSaveSrv" title="Lưu toàn bộ dữ liệu (nhà + tổ + ranh giới thôn) về máy">💾 Lưu về máy</button>
   <button id="btnDelTo" class="danger" title="Xóa toàn bộ ranh giới tổ (giữ nhà + mốc)">🗑 Xóa tổ</button>
   <button id="btnClear" class="danger" title="Xóa toàn bộ dữ liệu">🗑 Xóa hết</button>
   <button id="btnHelp">❓ Hướng dẫn</button>
+</div>
+<div id="fillModal" style="display:none;position:fixed;z-index:3000;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:18px;width:560px;max-width:94%;max-height:86%;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.3)">
+    <h3 style="margin:0 0 6px">📥 Đổ dữ liệu thành viên theo ID nhà</h3>
+    <div style="font-size:12.5px;color:#6b7280;margin-bottom:10px">
+      <b>Cách dùng:</b> 1) Click nhà trên bản đồ để lấy ID (hoặc gõ ID dưới đây) · 2) Dán danh sách thành viên (kèm dòng ID nếu có) · 3) Bấm <b>Nạp dữ liệu</b>.<br>
+      <b>Định dạng nhận dạng:</b> dòng chứa <code>ID GeoJSON: LSN-Hxxx</code> và các dòng <code>Tên | Ngày sinh | Giới tính | Địa chỉ</code>.
+    </div>
+    <input id="fillId" placeholder="ID nhà (vd: LSN-H067) — nếu trong dữ liệu dán có dòng ID thì để trống" style="width:100%;margin-bottom:8px">
+    <textarea id="fillData" rows="10" placeholder="Dán danh sách thành viên ở đây, ví dụ:
+Nguyễn Đức Hùng | 27/09/1977 | Nam | Tổ 3, Thôn Lệ Sơn Nam...
+Phạm Thị Ngọc Ánh | 11/05/1982 | Nữ | Tổ 3, ...
+...
+🆔 ID GeoJSON: LSN-H067" style="width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px;font:12.5px ui-monospace,Menlo,monospace"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn2" onclick="applyFill()">💾 Nạp dữ liệu</button>
+      <button class="btn2 gray" onclick="closeFill()">Đóng</button>
+    </div>
+    <div id="fillResult" style="margin-top:8px;font-size:12.5px"></div>
+  </div>
 </div>
 <input type="file" id="fileImport" accept=".geojson,.json" style="display:none">
 <input id="searchBox" placeholder="🔍 Tìm kiếm (vd: nhà văn hóa, ĐH409...) — Enter">
@@ -300,6 +324,12 @@ function houseInfo(l) {
     '<tr><td>Trẻ em</td><td>' + (esc(p.children) || '—') + '</td></tr>' +
     '<tr><td>Ghi chú</td><td>' + (esc(p.note) || '—') + '</td></tr>' +
     '</table>' +
+    (Array.isArray(p.members_list) && p.members_list.length ?
+      '<div style="margin-top:6px"><b>👥 Thành viên (' + p.members_list.length + ')</b></div>' +
+      p.members_list.map(m => '<div style="font-size:12.5px;padding:2px 0;border-bottom:1px dashed #eee">' +
+        esc(m.name) + (m.dob ? ' · <span style="color:#6b7280">' + esc(m.dob) + '</span>' : '') +
+        (m.gender ? ' · ' + esc(m.gender) : '') + '</div>').join('')
+      : '') +
     '<button class="primary" onclick="editHouse(this)">✏️ Sửa</button> ' +
     '<button onclick="deleteHouse(this)">🗑 Xóa</button></div>';
 }
@@ -541,6 +571,7 @@ function collectAll() {
       id: p.fid || undefined,
       properties: {
         fid: p.fid || undefined,
+        members_list: p.members_list || undefined,
         name: p.name || undefined,
         'addr:housenumber': p['addr:housenumber'] || undefined,
         members: p.members || undefined,
@@ -670,6 +701,62 @@ map.on('click', e => {
   btnMoc.textContent = '📌 Đặt mốc';
   map.getContainer().style.cursor = '';
 });
+
+// ================= ĐỔ DỮ LIỆU THEO ID =================
+document.getElementById('btnFill').onclick = () => {
+  document.getElementById('fillModal').style.display = 'flex';
+  document.getElementById('fillId').value = document.getElementById('idBox').value.trim() || '';
+  document.getElementById('fillData').value = '';
+  document.getElementById('fillResult').innerHTML = '';
+};
+window.closeFill = function() { document.getElementById('fillModal').style.display = 'none'; };
+
+// Tính tuổi từ dd/mm/yyyy
+function ageFromDob(dob) {
+  const m = String(dob || '').match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+  if (!m) return null;
+  const d = new Date(+m[3], +m[2] - 1, +m[1]);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000));
+}
+window.applyFill = function() {
+  const res = document.getElementById('fillResult');
+  const raw = document.getElementById('fillData').value;
+  let id = document.getElementById('fillId').value.trim().toUpperCase();
+  if (!id) {
+    const mId = raw.match(/LSN-H\d{3,}/i);
+    if (mId) id = mId[0].toUpperCase();
+  }
+  let layer = null;
+  drawn.eachLayer(l => { const p = props(l); if (p.fid && p.fid.toUpperCase() === id) layer = l; });
+  if (!id) { res.innerHTML = '<b style="color:#dc2626">⚠️ Thiếu ID nhà.</b> Gõ ID ở ô trên hoặc kèm dòng "ID GeoJSON: LSN-Hxxx" trong dữ liệu dán.'; return; }
+  if (!layer) { res.innerHTML = '<b style="color:#dc2626">⚠️ Không tìm thấy nhà có ID ' + id + '.</b> Bấm vào nhà trên bản đồ để xem ID thật.'; return; }
+
+  const members = [];
+  raw.split(/\\r?\\n/).forEach(line => {
+    line = line.trim();
+    if (!line || /ID\s*GeoJSON/i.test(line) || line.startsWith('🆔')) return;
+    const parts = line.split('|').map(s => s.trim());
+    if (parts.length < 2) return;
+    members.push({name: parts[0], dob: parts[1], gender: parts[2] || '', address: parts[3] || ''});
+  });
+  if (!members.length) { res.innerHTML = '<b style="color:#dc2626">⚠️ Không tìm thấy dòng thành viên nào.</b> Mỗi thành viên 1 dòng: Tên | Ngày sinh | Giới tính | Địa chỉ.'; return; }
+
+  const p = props(layer);
+  p.members_list = members;
+  p.members = members.length;
+  p.name = members[0].name;
+  p.elderly = members.filter(m => { const a = ageFromDob(m.dob); return a !== null && a >= 60; }).length;
+  p.children = members.filter(m => { const a = ageFromDob(m.dob); return a !== null && a < 16; }).length;
+  p.note = members[0].address || p.note || '';
+  saveState();
+  map.flyTo(layer.getBounds().getCenter(), 19);
+  layer.setPopupContent(houseInfo(layer));
+  layer.openPopup();
+  res.innerHTML = '<b style="color:#16a34a">✅ Đã nạp vào ' + id + ':</b> ' + members.length + ' thành viên · ' +
+    p.elderly + ' NCT · ' + p.children + ' trẻ em · Chủ hộ: ' + p.name +
+    '<br><span style="color:#888">Xem chi tiết trong popup nhà; bấm 💾 Lưu về máy để ghi ra file.</span>';
+};
 
 // ================= TÌM THEO ID GEOJSON =================
 document.getElementById('idBox').addEventListener('keydown', ev => {
