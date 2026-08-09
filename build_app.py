@@ -716,6 +716,16 @@ function closeDetail() {
   detailKind = '';
   setTimeout(() => map.invalidateSize({pan: false}), 260);
 }
+function houseAtPoint(latlng) {
+  let hit = null;
+  drawn.eachLayer(h => {
+    if (hit || !h.getBounds().contains(latlng)) return;
+    const latlngs = h.getLatLngs();
+    const ring = Array.isArray(latlngs[0]) ? latlngs[0] : latlngs;
+    if (ring.length && pointInRing(latlng, ring)) hit = h;
+  });
+  return hit;
+}
 function bindRegionClick(l) {
   if (!l || l._detailBound) return;
   l._detailBound = true;
@@ -724,7 +734,9 @@ function bindRegionClick(l) {
     detailClickHandled = true;
     setTimeout(() => { detailClickHandled = false; }, 0);
     if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
-    showDetail(regionKind(l), l);
+    const kind = regionKind(l);
+    const house = kind === 'house' ? null : houseAtPoint(e.latlng);
+    showDetail(house ? 'house' : kind, house || l);
   });
 }
 function bindMocClick(m) {
