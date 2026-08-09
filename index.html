@@ -126,7 +126,7 @@
     <h3 style="margin:0 0 6px">📥 Đổ dữ liệu thành viên theo ID nhà</h3>
     <div style="font-size:12.5px;color:#6b7280;margin-bottom:10px">
       <b>Cách dùng:</b> 1) Click nhà trên bản đồ để lấy ID (hoặc gõ ID dưới đây) · 2) Dán danh sách thành viên (kèm dòng ID nếu có) · 3) Bấm <b>Nạp dữ liệu</b>.<br>
-      <b>Định dạng nhận dạng:</b> dòng chứa <code>ID GeoJSON: LSN-Hxxx</code> và các dòng <code>Tên | Ngày sinh | Giới tính | Địa chỉ</code>.
+      <b>Định dạng nhận dạng:</b> dòng chứa <code>ID GeoJSON: LSN-Hxxx</code> và các dòng <code>Tên | Ngày sinh | Giới tính | Tên chủ hộ | Địa chỉ</code> — <b>cột 4 = tên chủ hộ</b> (app tự tìm thành viên trùng tên để đánh dấu 👑).
     </div>
     <input id="fillId" placeholder="ID nhà (vd: LSN-H067) — nếu trong dữ liệu dán có dòng ID thì để trống" style="width:100%;margin-bottom:8px">
     <textarea id="fillData" rows="10" placeholder="Dán danh sách thành viên ở đây, ví dụ:
@@ -293,7 +293,8 @@ function houseInfo(l) {
     (Array.isArray(p.members_list) && p.members_list.length ?
       '<div style="margin-top:6px"><b>👥 Thành viên (' + p.members_list.length + ')</b></div>' +
       p.members_list.map(m => '<div style="font-size:12.5px;padding:2px 0;border-bottom:1px dashed #eee">' +
-        esc(m.name) + (m.dob ? ' · <span style="color:#6b7280">' + esc(m.dob) + '</span>' : '') +
+        (m.head ? '<b>👑</b> ' : '') + esc(m.name) + (m.head ? ' <span style="color:#b45309;font-size:11px">(Chủ hộ)</span>' : '') +
+        (m.dob ? ' · <span style="color:#6b7280">' + esc(m.dob) + '</span>' : '') +
         (m.gender ? ' · ' + esc(m.gender) : '') + '</div>').join('')
       : '') +
     '<button class="primary" onclick="editHouse(this)">✏️ Sửa</button> ' +
@@ -704,14 +705,21 @@ window.applyFill = function() {
     if (!line || /ID\s*GeoJSON/i.test(line) || line.startsWith('🆔')) return;
     const parts = line.split('|').map(s => s.trim());
     if (parts.length < 2) return;
-    members.push({name: parts[0], dob: parts[1], gender: parts[2] || '', address: parts[3] || ''});
+    // Cột 4 (index 3) = TÊN CHỦ HỘ (giống nhau ở mọi dòng); cột 5+ = địa chỉ
+    members.push({name: parts[0], dob: parts[1], gender: parts[2] || '',
+      headName: parts[3] || '', address: parts.slice(4).join(' · '), head: false});
   });
-  if (!members.length) { res.innerHTML = '<b style="color:#dc2626">⚠️ Không tìm thấy dòng thành viên nào.</b> Mỗi thành viên 1 dòng: Tên | Ngày sinh | Giới tính | Địa chỉ.'; return; }
+  if (!members.length) { res.innerHTML = '<b style="color:#dc2626">⚠️ Không tìm thấy dòng thành viên nào.</b> Mỗi thành viên 1 dòng: Tên | Ngày sinh | Giới tính | Tên chủ hộ | Địa chỉ.'; return; }
 
   const p = props(layer);
+  // Chủ hộ = cột 4 (headName) — tìm thành viên trùng tên để đánh dấu 👑
+  const headName = members[0].headName || members[0].name;
+  let head = null;
+  members.forEach(m => { if (m.name.toUpperCase() === headName.toUpperCase()) { m.head = true; head = m; } });
+  if (!head) { members[0].head = true; head = members[0]; }
   p.members_list = members;
   p.members = members.length;
-  p.name = members[0].name;
+  p.name = head.name;
   p.elderly = members.filter(m => { const a = ageFromDob(m.dob); return a !== null && a >= 60; }).length;
   p.children = members.filter(m => { const a = ageFromDob(m.dob); return a !== null && a < 16; }).length;
   p.note = members[0].address || p.note || '';
