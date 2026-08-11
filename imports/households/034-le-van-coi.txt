@@ -1,0 +1,4 @@
+Lê Văn Côi | 12/10/1970 | Nam | Lê Văn Côi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Hồng Sơn | 29/01/1993 | Nam | Lê Văn Côi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thị Hương Giang | 05/12/1996 | Nữ | Lê Văn Côi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Văn Nghĩa | 01/01/1969 | Nam | Lê Văn Côi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

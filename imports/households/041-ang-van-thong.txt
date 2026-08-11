@@ -1,0 +1,4 @@
+Đặng Văn Thống | 01/01/1963 | Nam | Đặng Văn Thống | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Tuyến | 25/05/1970 | Nữ | Đặng Văn Thống | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Đặng Thanh Ngân | 15/01/2000 | Nữ | Đặng Văn Thống | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Đặng Văn Lĩnh | 10/08/1995 | Nam | Đặng Văn Thống | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

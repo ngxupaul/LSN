@@ -1,0 +1,3 @@
+Nguyễn Xuân Trọng | 01/01/1974 | Nam | Nguyễn Xuân Trọng | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Trần Thị Phương | 01/04/1974 | Nữ | Nguyễn Xuân Trọng | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Xuân Phong | 23/01/2004 | Nam | Nguyễn Xuân Trọng | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

@@ -1,0 +1,4 @@
+Phan Văn Bốn | 15/10/1966 | Nam | Phan Văn Bốn | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Phan Văn Huy | 02/08/2005 | Nam | Phan Văn Bốn | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Phan Thị Thuỳ Ly | 01/01/1995 | Nữ | Phan Văn Bốn | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Trần Thị Anh | 01/01/1970 | Nữ | Phan Văn Bốn | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

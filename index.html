@@ -564,10 +564,39 @@ function thonDetailMarkup(l) {
 }
 function memberEditText(l) {
   const p = props(l);
+  normalizeHouseholdProperties(p);
   const members = Array.isArray(p.members_list) ? p.members_list : [];
-  const headName = (members.find(m => m.head) || {}).name || p.name || '';
+  const headName = members[0] && members[0].headName ? members[0].headName : (p.name || '');
   const address = members[0] && members[0].address ? members[0].address : (p.note || '');
   return members.map(m => [m.name || '', m.dob || '', m.gender || '', headName, address].join(' | ')).join('\n');
+}
+function normalizedPersonName(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('vi-VN');
+}
+function normalizeHouseholdProperties(p) {
+  if (!p || !Array.isArray(p.members_list) || !p.members_list.length) return;
+  const members = p.members_list;
+  const names = new Map(members.map(m => [normalizedPersonName(m.name), m]));
+  const column4 = members.map(m => String(m.headName || '').trim()).find(Boolean) || '';
+  let headName = column4;
+
+  // Dữ liệu cũ từng bị lệch cột: địa chỉ nằm trong headName và address bị trống.
+  // Chỉ tự sửa khi cột 4 không khớp thành viên nhưng tên chủ hộ đã lưu vẫn khớp.
+  const looksLikeLegacyShift = headName && normalizedPersonName(headName) === normalizedPersonName(p.note) &&
+    members.every(m => !String(m.address || '').trim());
+  if (looksLikeLegacyShift && !names.has(normalizedPersonName(headName)) && names.has(normalizedPersonName(p.name))) {
+    headName = names.get(normalizedPersonName(p.name)).name;
+  }
+  if (!headName) headName = members[0].name || '';
+
+  const matchedHead = names.get(normalizedPersonName(headName));
+  members.forEach(m => {
+    m.headName = headName;
+    m.head = m === matchedHead;
+    if (!m.address && p.note) m.address = p.note;
+  });
+  // Cột 4 là nguồn dữ liệu chính cho tên chủ hộ, kể cả khi tên đó chưa có trong cột 1.
+  p.name = matchedHead ? matchedHead.name : headName;
 }
 function parseMemberText(raw) {
   const members = [];
@@ -591,13 +620,10 @@ function applyMemberText(l, raw) {
     p.children = '';
     return;
   }
-  const headName = members[0].headName || members[0].name;
-  let head = null;
-  members.forEach(m => { if (m.name.toUpperCase() === headName.toUpperCase()) { m.head = true; head = m; } });
-  if (!head) { members[0].head = true; head = members[0]; }
   p.members_list = members;
+  // Luôn đọc chủ hộ từ cột 4 và chuẩn hóa giá trị này cho cả hộ.
+  normalizeHouseholdProperties(p);
   p.members = members.length;
-  p.name = head.name;
   p.elderly = members.filter(m => { const a = ageFromDob(m.dob); return a !== null && a >= 60; }).length;
   p.children = members.filter(m => { const a = ageFromDob(m.dob); return a !== null && a < 16; }).length;
   p.note = members[0].address || p.note || '';
@@ -840,6 +866,9 @@ function addFeature(f) {
   }
   // Tạo polygon tường minh từ tọa độ (không phụ thuộc L.geoJSON)
   const ring = f.geometry.coordinates[0].map(c => [c[1], c[0]]);
+  if (f.properties && f.properties.type !== 'to' && f.properties.type !== 'thon') {
+    normalizeHouseholdProperties(f.properties);
+  }
   const l = L.polygon(ring);
   l.feature = f;
   l.uid = uid++;
