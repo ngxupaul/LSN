@@ -21,10 +21,11 @@
   header .btn { background:#f5f8f6; color:var(--t); border:1px solid var(--line); border-radius:8px; padding:7px 10px; font:650 12px system-ui; cursor:pointer; transition:background .15s,border-color .15s,color .15s,transform .15s; }
   header .btn:hover { background:#e8f3ed; border-color:#b9d7ca; color:var(--g-dark); transform:translateY(-1px); }
   header .nav-btn.active { background:#e4f3ed; border-color:#a8d6c4; color:var(--g-dark); }
-  #searchBox { padding:8px 12px; border:1px solid var(--line); background:#fbfdfc; border-radius:8px; width:220px; font:13px system-ui; outline:none; }
+  .search-wrap { position:relative; flex:0 0 220px; min-width:0; z-index:2100; }
+  #searchBox { display:block; padding:8px 12px; border:1px solid var(--line); background:#fbfdfc; border-radius:8px; width:100%; font:13px system-ui; outline:none; }
   #searchBox:focus { border-color:var(--g); box-shadow:0 0 0 3px rgba(22,131,108,.12); }
-  #searchRes { position:absolute; top:52px; right:16px; width:300px; background:#fff; color:var(--t); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); max-height:300px; overflow-y:auto; display:none; z-index:2000; }
-  #searchRes .r { padding:8px 12px; border-bottom:1px solid #f3f4f6; cursor:pointer; font-size:12.5px; }
+  #searchRes { position:absolute; top:calc(100% + 8px); left:0; width:min(420px, calc(100vw - 24px)); max-width:calc(100vw - 24px); background:#fff; color:var(--t); border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 28px rgba(26,53,43,.18); max-height:min(320px, calc(100vh - 96px)); overflow-y:auto; display:none; z-index:2200; }
+  #searchRes .r { padding:9px 12px; border-bottom:1px solid #f3f4f6; cursor:pointer; font-size:12.5px; line-height:1.35; overflow-wrap:anywhere; }
   #searchRes .r:hover { background:#f0fdf4; }
   #top { background:var(--canvas); border-bottom:1px solid var(--line); padding:14px 18px 16px; position:relative; z-index:1050; }
   #overviewHead { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px; }
@@ -90,7 +91,28 @@
   #tabs button { flex:1; border:none; background:transparent; padding:11px 2px 10px; font:650 11px system-ui; cursor:pointer; color:var(--m); border-bottom:2.5px solid transparent; }
   #tabs button.on { color:var(--g-dark); border-bottom-color:var(--g); background:#fff; }
   #panel { flex:1; overflow-y:auto; padding:15px; font-size:13px; }
+  #panel > * { animation:panelReveal .42s cubic-bezier(.22,.8,.25,1) both; }
+  #panel > *:nth-child(2) { animation-delay:.05s; }
+  #panel > *:nth-child(3) { animation-delay:.1s; }
+  #panel > *:nth-child(4) { animation-delay:.15s; }
+  #dashboardView.is-active .dash-panel { animation:dashRise .55s cubic-bezier(.22,.8,.25,1) both; }
+  #dashboardView.is-active .dash-panel:nth-child(2) { animation-delay:.08s; }
+  #dashboardView.is-active .dash-panel:nth-child(3) { animation-delay:.16s; }
+  @keyframes panelReveal { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes dashRise { from { opacity:0; transform:translateY(18px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
   #panel h2 { margin:0 0 10px; font-size:15.5px; }
+  .house-detail-head { margin:-15px -15px 14px; padding:16px 15px 14px; background:linear-gradient(135deg,#f3fbf7,#fff); border-bottom:1px solid #e3eee8; }
+  .house-detail-head .eyebrow { color:var(--g-dark); font-size:10px; font-weight:850; letter-spacing:1.1px; text-transform:uppercase; }
+  .house-detail-head h2 { margin:5px 0 2px; font-size:21px; letter-spacing:-.25px; }
+  .house-code { color:#7c3aed; font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .house-badge { display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; background:#dcfce7; color:#166534; font-size:11px; font-weight:800; letter-spacing:.3px; }
+  .house-id { color:#7c3aed; font:600 13px ui-monospace,SFMono-Regular,Menlo,monospace; margin:7px 0 12px; }
+  .house-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:0 0 16px; }
+  .house-stat { min-width:0; padding:9px 5px 8px; border:1px solid #c9f3d8; border-radius:12px; background:#f0fdf4; text-align:center; }
+  .house-stat strong { display:block; color:#166534; font-size:22px; line-height:1.05; }
+  .house-stat span { display:block; color:#71817a; font-size:10.5px; margin-top:4px; }
+  .house-section-title { margin:0 0 8px; font-size:14px; }
+  .house-detail-head + .house-badge + .house-id + .house-stats + .house-section-title { margin-top:0; }
   .kv { display:flex; justify-content:space-between; padding:3.5px 0; border-bottom:1px dashed #eee; }
   .kv b { font-weight:700; }
   .bar { height:8px; background:#eef2f7; border-radius:99px; margin:3px 0 8px; overflow:hidden; }
@@ -112,6 +134,19 @@
   .legend { position:absolute; z-index:900; bottom:14px; right:14px; background:rgba(255,255,255,.95); border:1px solid var(--line); border-radius:12px; padding:8px 11px; font-size:11.5px; box-shadow:var(--shadow); line-height:1.9; }
   .legend i { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:6px; vertical-align:-2px; }
   footer { flex:none; background:#153d33; border-top:0; font-size:11px; line-height:1.35; color:#d6e8df; padding:6px 18px; }
+  #demoOverlay { position:absolute; z-index:1300; top:14px; left:50%; transform:translateX(-50%); min-width:330px; max-width:calc(100% - 32px); background:rgba(6,95,70,.96); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:16px; padding:10px 14px 12px; box-shadow:0 10px 30px rgba(0,0,0,.28); display:none; pointer-events:auto; }
+  #demoOverlay.show { display:block; animation:demoIn .45s ease both; }
+  #demoOverlay .demo-title { display:flex; justify-content:space-between; gap:12px; font-weight:800; font-size:13px; }
+  #demoOverlay .demo-sub { margin-top:3px; font-size:11px; opacity:.85; }
+  #demoOverlay .demo-track { height:6px; margin-top:9px; border-radius:99px; background:rgba(255,255,255,.25); overflow:hidden; }
+  #demoOverlay .demo-track i { display:block; height:100%; width:0; border-radius:99px; background:#fbbf24; transition:width .7s ease; }
+  #demoOverlay .demo-controls { display:flex; gap:6px; margin-top:9px; }
+  #demoOverlay .demo-controls button { flex:1; border:0; border-radius:8px; padding:5px 8px; cursor:pointer; color:#064e3b; background:#ecfdf5; font:700 11px system-ui; }
+  #demoOverlay .demo-controls button:last-child { background:#fef3c7; color:#78350f; }
+  .demo-focus { animation:demoPulse 1.4s ease-in-out infinite !important; }
+  .to-map-label { display:inline-flex; align-items:center; justify-content:center; min-width:52px; height:32px; padding:0 11px; border:3px solid #fff; border-radius:999px; color:#fff; font:900 14px/1 system-ui,sans-serif; letter-spacing:.2px; text-shadow:0 2px 3px rgba(0,0,0,.8); box-shadow:0 3px 10px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.35); transform:translate(-50%,-50%); white-space:nowrap; }
+  @keyframes demoIn { from { opacity:0; transform:translate(-50%,-12px) scale(.96); } to { opacity:1; transform:translate(-50%,0) scale(1); } }
+  @keyframes demoPulse { 0%,100% { filter:drop-shadow(0 0 0 rgba(251,191,36,0)); } 50% { filter:drop-shadow(0 0 12px rgba(251,191,36,.95)); } }
   footer b { color:#fff; }
   #reportArea { display:none; }
   @media print {
@@ -129,9 +164,9 @@
     .brand-mark { width:31px; height:31px; }
     header h1 { font-size:14px; }
     .header-actions { width:100%; margin-left:0; justify-content:flex-start; gap:6px; }
-    #searchRes { top:calc(100% - 1px); left:14px; right:14px; width:auto; }
+    .search-wrap { order:1; flex:1 1 190px; width:100%; }
+    #searchRes { top:calc(100% + 6px); left:0; width:100%; max-width:100%; max-height:280px; }
     header .badge { order:0; }
-    header #searchBox { order:1; flex:1 1 190px; width:auto; min-width:0; }
     header .btn { order:2; padding:7px 9px; }
     #top { padding:8px 14px; }
     #overviewHead { align-items:flex-start; margin-bottom:10px; }
@@ -156,10 +191,12 @@
     <span class="brand-mark" aria-hidden="true">LS</span>
     <div><h1>LỆ SƠN NAM SMART VILLAGE</h1><span class="sub">Quản lý nhân hộ khẩu · Hòa Tiến, Hòa Vang, Đà Nẵng</span></div>
   </div>
-  <span class="badge">DEMO · DỮ LIỆU MÔ PHỎNG</span>
+  <span class="badge">DỮ LIỆU IMPORT · 70 NHÀ / 57 NHÂN KHẨU</span>
   <div class="header-actions">
-    <input id="searchBox" aria-label="Tìm chủ hộ hoặc mã hộ" placeholder="⌕  Tìm chủ hộ / mã hộ..." autocomplete="off">
-    <div id="searchRes"></div>
+    <div class="search-wrap">
+      <input id="searchBox" aria-label="Tìm chủ hộ hoặc mã hộ" placeholder="⌕  Tìm chủ hộ / mã hộ..." autocomplete="off">
+      <div id="searchRes"></div>
+    </div>
     <button class="btn nav-btn active" data-view="dashboard" onclick="setView('dashboard')">▦ Dashboard</button>
     <button class="btn nav-btn" data-view="map" onclick="setView('map')">⌖ Bản đồ</button>
     <button class="btn" onclick="openTab('an')">🤝 An sinh</button>
@@ -172,7 +209,7 @@
 <div id="top">
   <div id="overviewHead">
     <div><div class="eyebrow">Toàn cảnh vận hành</div><h2>Lệ Sơn Nam hôm nay</h2></div>
-    <div class="sync"><span class="sync-dot"></span> Dữ liệu mô phỏng · cập nhật hôm nay</div>
+    <div class="sync"><span class="sync-dot"></span> Dữ liệu thật · cập nhật từ danh sách hộ</div>
   </div>
   <div id="dash">
     <div class="card"><div class="lbl">Tổng hộ dân</div><div class="val" id="dHos">–</div></div>
@@ -209,27 +246,28 @@
   </section>
   <section class="dash-panel accent">
     <div class="eyebrow">Không gian dữ liệu</div><h3>Mở bản đồ dân cư</h3>
-    <p>Xem vị trí 66 hộ mô phỏng, ranh giới tổ, điểm phản ánh và thông tin an sinh trên cùng một không gian trực quan.</p>
+    <p>Xem 70 nhà và 57 nhân khẩu đúng theo bản Import mới nhất; các nhà chưa có hồ sơ vẫn được giữ trên bản đồ.</p>
     <div class="dash-cta"><span class="sync"><span class="sync-dot"></span> Bản đồ sẵn sàng</span><button class="btn2" onclick="setView('map')">Xem bản đồ →</button></div>
   </section>
 </div>
 </div>
 <div id="mapView" class="app-view">
 <div id="wrap">
-  <div id="map"></div>
+  <div id="map">
+    <div class="legend">
+      <i style="background:#16a34a"></i> Nhà ổn định<br>
+      <i style="background:#f59e0b"></i> Hộ chính sách<br>
+      <i style="background:#dc2626"></i> Hộ cần hỗ trợ<br>
+      <i style="background:rgba(30,64,175,.25);border:2px solid #1e40af"></i> Vùng tổ<br>
+      <i style="background:#7c3aed;border-radius:50%"></i> Điểm phản ánh
+    </div>
+  </div>
   <div id="filters">
     <button class="red" onclick="tog('sup')">🆘 Cần hỗ trợ</button>
     <button onclick="tog('pol')">🚩 Chính sách</button>
     <button onclick="tog('vneid')">🟦 VNeID</button>
     <button onclick="tog('bhyt')">🟩 BHYT</button>
     <button class="red" onclick="tog('rep')">⚠️ Phản ánh</button>
-  </div>
-  <div class="legend">
-    <i style="background:#16a34a"></i> Nhà ổn định<br>
-    <i style="background:#f59e0b"></i> Hộ chính sách<br>
-    <i style="background:#dc2626"></i> Hộ cần hỗ trợ<br>
-    <i style="background:rgba(30,64,175,.25);border:2px solid #1e40af"></i> Vùng tổ<br>
-    <i style="background:#7c3aed;border-radius:50%"></i> Điểm phản ánh
   </div>
   <div id="side">
     <div id="tabs">
@@ -244,8 +282,9 @@
 </div>
 </div>
 <footer>
-  <b>Lệ Sơn Nam Smart Village</b> – demo quản lý cho Trưởng thôn · dữ liệu hộ MÔ PHỎNG (Nghị định 13/2023) · vị trí nhà thật từ bản đồ vẽ tay
+  <b>Lệ Sơn Nam Smart Village</b> – dữ liệu đồng bộ từ backups/latest-drawn.json · vị trí nhà và ghi chú theo bản Import · VNeID/BHYT/chính sách/phản ánh chưa có nguồn
 </footer>
+<div id="demoOverlay"><div class="demo-title"><span id="demoTitle">Tour Thôn Lệ Sơn Nam</span><span id="demoCount">1/1</span></div><div class="demo-sub" id="demoSub">Đang chuẩn bị trình diễn...</div><div class="demo-track"><i id="demoProgress"></i></div><div class="demo-controls"><button onclick="demoPrev()">← Trước</button><button onclick="demoNext()">Tiếp →</button><button onclick="demoStop()">Kết thúc</button></div></div>
 <div id="reportArea"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -285,14 +324,85 @@ let houses = DATA.houses.map(h => hydrateImportedHousehold(Object.assign({}, h))
 const tos = DATA.tos.map(t => Object.assign({}, t, {house_ids: t.house_ids.slice()}));
 let reports = DATA.reports.map(r => Object.assign({}, r));
 let toMap = Object.assign({}, DATA.to_of);
-const LSKEY = 'lsv_demo_v2';
+
+// Nạp danh sách hộ thật từ file nguồn; các trường không có trong nguồn được để trống.
+// Nguồn hộ chuẩn của trang này là bản xuất mới nhất từ màn hình Import.
+// Khối import cũ được giữ làm tài liệu nhưng không được dùng để ghép tuần tự ID nhà.
+fetch('data/disabled-households-source.json').then(r => r.json()).then(bundle => {
+  const rows = bundle.households || [];
+  const today = new Date();
+  const age = value => {
+    const m = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return null;
+    const birth = new Date(+m[3], +m[2] - 1, +m[1]);
+    return today.getFullYear() - birth.getFullYear() - ((today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) ? 1 : 0);
+  };
+  rows.slice(0, houses.length).forEach((row, i) => {
+    const h = houses[i];
+    const members = (row.members || []).map(m => ({name:m.name, dob:m.dob, gender:m.gender, head:!!m.head}));
+    const ages = members.map(m => age(m.dob));
+    Object.assign(h, {owner: row.headName || 'Chưa nhập dữ liệu', address: row.address || '', memberDetails: members,
+      members: members.length, elderly: ages.filter(a => a !== null && a >= 60).length, children: ages.filter(a => a !== null && a < 18).length,
+      policy: null, support: null, vneid: null, bhyt: null});
+  });
+  houses.slice(rows.length).forEach(h => Object.assign(h, {owner: 'Chưa nhập dữ liệu', members: 0, elderly: 0, children: 0, memberDetails: [], policy: null, support: null, vneid: null, bhyt: null}));
+  reports = [];
+  tos.splice(0, tos.length, {id: 3, name: 'Tổ 3', house_ids: houses.slice(0, rows.length).map(h => h.id)});
+  toMap = {}; tos[0].house_ids.forEach(id => { toMap[id] = 3; });
+  store(); renderAll();
+}).catch(() => {});
+
+// Ranh giới tổ/thôn vẽ tay mới nhất, lấy từ bản sao đã lưu trên máy.
+function pointInBoundary(point, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    const hit = ((yi > point[1]) !== (yj > point[1])) && (point[0] < (xj - xi) * (point[1] - yi) / ((yj - yi) || 1e-12) + xi);
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+fetch('backups/latest-drawn.json').then(r => r.json()).then(fc => {
+  const allFeatures = fc.features || [];
+  const houseFeatures = allFeatures.filter(f => f.geometry && f.geometry.type === 'Polygon' && (!f.properties || !['to', 'thon'].includes(f.properties.type)));
+  houses = houseFeatures.map((f, i) => {
+    const p = f.properties || {}, ring = f.geometry.coordinates[0] || [];
+    const c = ring.reduce((a, q) => [a[0] + q[0] / Math.max(1, ring.length), a[1] + q[1] / Math.max(1, ring.length)], [0, 0]);
+    const details = Array.isArray(p.members_list) ? p.members_list.map(m => Object.assign({}, m)) : [];
+    return {id: p.fid || ('LSN-H' + String(i + 1).padStart(3, '0')), owner: p.name || 'Chưa nhập dữ liệu', address: p.note || '', note: p.note || '', memberDetails: details,
+      members: Number(p.members) || details.length || 0, elderly: Number(p.elderly) || 0, children: Number(p.children) || 0,
+      policy: null, support: null, vneid: null, bhyt: null, geom: ring, c};
+  });
+  const boundaryFeatures = allFeatures.filter(f => f.properties && (f.properties.type === 'to' || f.properties.type === 'thon'));
+  const thon = boundaryFeatures.find(f => f.properties.type === 'thon');
+  villageBoundary = thon ? thon.geometry.coordinates[0] : null;
+  const actualTos = boundaryFeatures.filter(f => f.properties.type === 'to').map((f, i) => {
+    const ring = f.geometry.coordinates[0];
+    const idMatch = String(f.properties.name || '').match(/(\d+)/);
+    const id = idMatch ? Number(idMatch[1]) : i + 1;
+    return {id, name: f.properties.name || ('Tổ ' + id), ring, house_ids: houses.filter(h => pointInBoundary(h.c, ring)).map(h => h.id)};
+  }).sort((a, b) => a.id - b.id);
+  if (actualTos.length) {
+    tos.splice(0, tos.length, ...actualTos);
+    toMap = {};
+    tos.forEach(t => t.house_ids.forEach(id => { toMap[id] = t.id; }));
+    houses.forEach(h => {
+      const t = tos.find(x => x.house_ids.includes(h.id));
+      if (!t) return;
+      h.address = t.name + ', Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng';
+      if (Array.isArray(h.memberDetails)) h.memberDetails.forEach(m => { m.address = h.address; });
+    });
+    renderAll();
+  }
+}).catch(() => {});
+const LSKEY = 'lsv_real_v3';
 function store() {
   try {
     localStorage.setItem(LSKEY, JSON.stringify({houses, reports, toMap, tos: tos.map(t => ({id: t.id, house_ids: t.house_ids.slice()}))}));
   } catch (e) {}
 }
 try {
-  const raw = localStorage.getItem(LSKEY) || localStorage.getItem('lsv_demo_v1');
+  const raw = localStorage.getItem(LSKEY);
   const s = raw ? JSON.parse(raw) : null;
   if (s && Array.isArray(s.houses)) houses = s.houses.map(h => hydrateImportedHousehold(h));
   if (s && Array.isArray(s.reports)) reports = s.reports;
@@ -306,25 +416,31 @@ function toOf(h) { return toMap[h.id] || DATA.to_of[h.id] || 1; }
 function byId(id) { return houses.find(h => h.id === id); }
 
 // ============ MAP ============
-const map = L.map('map', {preferCanvas: true}).setView([15.9606, 108.1855], 16);
-const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: 'Tiles &copy; Google (tham chiếu)'});
+const map = L.map('map', {preferCanvas: true, maxZoom: 20}).setView([15.9606, 108.1855], 16);
+const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {maxZoom: 20, maxNativeZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: 'Tiles &copy; Google (tham chiếu)'});
 googleHybrid.addTo(map);
 const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19});
 L.control.layers({'Google Hybrid': googleHybrid, 'OSM': osm}).addTo(map);
 
-function hColor(h) { return h.support ? '#dc2626' : (h.policy ? '#f59e0b' : '#16a34a'); }
+function hColor(h) { return h.support === true ? '#dc2626' : (h.policy === true ? '#f59e0b' : (h.members ? '#16a34a' : '#94a3b8')); }
 const houseLayer = L.featureGroup().addTo(map);
 const repLayer = L.featureGroup().addTo(map);
 const toLayer = L.featureGroup().addTo(map);
+const boundaryLayer = L.featureGroup().addTo(map);
+let villageBoundary = null;
 let addHouseMode = false, addRepMode = false;
 let hasFittedMap = false;
+let demoFocusedTo = null, demoFocusedHouse = null, demoMapMode = false, selectedHouseId = null, pendingHouseFocus = null;
 
 function renderHouses() {
   houseLayer.clearLayers();
   houses.forEach(h => {
-    const poly = L.polygon(h.geom.map(p => [p[1], p[0]]), {color: hColor(h), weight: 2, fillColor: hColor(h), fillOpacity: .55});
+    const focused = !demoFocusedHouse || demoFocusedHouse === h.id;
+    const selected = !selectedHouseId || selectedHouseId === h.id;
+    const stroke = selectedHouseId === h.id ? '#f97316' : hColor(h);
+    const poly = L.polygon(h.geom.map(p => [p[1], p[0]]), {color: stroke, weight: selectedHouseId === h.id ? 5 : (focused && selected ? 2.8 : 1), fillColor: stroke, fillOpacity: selectedHouseId === h.id ? .9 : (focused && selected ? .62 : .06), opacity: selectedHouseId === h.id ? 1 : (focused && selected ? 1 : .22)});
     poly.h = h;
-    poly.on('click', () => { openTab('chi'); showHouse(h); });
+    poly.on('click', () => { focusHouse(h); openTab('chi'); showHouse(h); });
     poly.bindTooltip(h.id + ' · ' + h.owner, {sticky: true});
     houseLayer.addLayer(poly);
   });
@@ -351,22 +467,50 @@ function hull(pts) {
 const TO_COLORS = ['#1e40af', '#b45309', '#065f46', '#7c3aed', '#be185d', '#0369a1'];
 function renderTos() {
   toLayer.clearLayers();
+  boundaryLayer.clearLayers();
+  if (villageBoundary) {
+    L.polygon(villageBoundary.map(p => [p[1], p[0]]), {color: '#0f766e', weight: 3, dashArray: '9 6', fillColor: '#14b8a6', fillOpacity: .04}).bindTooltip('Ranh giới thôn (vẽ tay)', {sticky: true}).addTo(boundaryLayer);
+  }
   tos.forEach((t, i) => {
     const ids = new Set(t.house_ids);
     const pts = houses.filter(h => ids.has(h.id)).map(h => [h.c[0], h.c[1]]);
-    if (!pts.length) return;
+    if (!pts.length && !t.ring) return;
     let ring;
-    if (pts.length >= 3) ring = hull(pts);
+    if (t.ring && t.ring.length >= 3) ring = t.ring;
+    else if (pts.length >= 3) ring = hull(pts);
     else { const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]); ring = [[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)], [Math.min(...xs), Math.max(...ys)]]; }
     const color = TO_COLORS[i % TO_COLORS.length];
-    const poly = L.polygon(ring.map(p => [p[1], p[0]]), {color: color, weight: 2.5, fillColor: color, fillOpacity: .12});
+    const focused = !demoFocusedTo || demoFocusedTo === t.id;
+    const poly = L.polygon(ring.map(p => [p[1], p[0]]), {color: color, weight: focused ? 4 : 1.4, fillColor: color, fillOpacity: focused ? .22 : .035, opacity: focused ? 1 : .3});
     poly.t = t;
     poly.on('click', () => { openTab('chi'); showTo(t); });
     poly.bindTooltip(t.name, {sticky: true});
     toLayer.addLayer(poly);
     const c = poly.getBounds().getCenter();
-    L.marker(c, {icon: L.divIcon({className: '', html: '<div style="background:' + color + ';color:#fff;border-radius:8px;padding:2px 8px;font:700 11.5px system-ui;box-shadow:0 2px 6px rgba(0,0,0,.35)">' + t.name + '</div>', iconSize: [0, 0]})}).addTo(toLayer);
+    L.marker(c, {interactive: false, zIndexOffset: 1200, icon: L.divIcon({className: '', html: '<div class="to-map-label" style="background:' + color + '">' + t.name + '</div>', iconSize: [0, 0], iconAnchor: [0, 0]})}).addTo(toLayer);
   });
+}
+function setDemoFocus(toId, houseId) {
+  demoFocusedTo = toId || null;
+  demoFocusedHouse = houseId || null;
+  renderHouses(); renderTos();
+}
+function focusHouse(h) {
+  if (!h) return;
+  selectedHouseId = h.id;
+  renderHouses();
+  const fly = () => {
+    map.invalidateSize({pan: false});
+    map.flyTo([h.c[1], h.c[0]], 20, {duration: 2.1, easeLinearity: .06});
+    if (pendingHouseFocus === h.id) pendingHouseFocus = null;
+  };
+  if (pendingHouseFocus === h.id || !document.getElementById('mapView').classList.contains('is-active')) setTimeout(fly, 120);
+  else fly();
+}
+function clearHouseFocus() {
+  if (!selectedHouseId) return;
+  selectedHouseId = null;
+  renderHouses();
 }
 function aggTo(t) {
   const ids = new Set(t.house_ids);
@@ -378,30 +522,30 @@ function aggTo(t) {
 
 // ============ DASHBOARD + BIỂU ĐỒ ============
 function renderAll() {
-  const tot = {mem: 0, eld: 0, kid: 0, pol: 0, sup: 0, vn: 0, bh: 0};
-  houses.forEach(h => { tot.mem += h.members; tot.eld += h.elderly; tot.kid += h.children; if (h.policy) tot.pol++; if (h.support) tot.sup++; if (h.vneid) tot.vn++; if (h.bhyt) tot.bh++; });
+  const tot = {mem: 0, eld: 0, kid: 0, pol: 0, sup: 0, vn: 0, bh: 0, polKnown: 0, supKnown: 0, vnKnown: 0, bhKnown: 0};
+  houses.forEach(h => { tot.mem += h.members; tot.eld += h.elderly; tot.kid += h.children; if (h.policy != null) { tot.polKnown++; if (h.policy) tot.pol++; } if (h.support != null) { tot.supKnown++; if (h.support) tot.sup++; } if (h.vneid != null) { tot.vnKnown++; if (h.vneid) tot.vn++; } if (h.bhyt != null) { tot.bhKnown++; if (h.bhyt) tot.bh++; } });
   const openRep = reports.filter(r => r.status !== 'Đã xử lý').length;
   document.getElementById('dHos').innerHTML = houses.length + ' <small>hộ</small>';
   document.getElementById('dMem').innerHTML = tot.mem + ' <small>người</small>';
   document.getElementById('dEld').textContent = tot.eld;
   document.getElementById('dKid').textContent = tot.kid;
-  document.getElementById('dPol').textContent = tot.pol;
-  document.getElementById('dSup').textContent = tot.sup;
-  document.getElementById('dVn').innerHTML = Math.round(tot.vn / houses.length * 100) + '<small>%</small>';
-  document.getElementById('dRp').textContent = openRep;
+  document.getElementById('dPol').textContent = tot.polKnown ? tot.pol : '—';
+  document.getElementById('dSup').textContent = tot.supKnown ? tot.sup : '—';
+  document.getElementById('dVn').innerHTML = tot.vnKnown ? Math.round(tot.vn / tot.vnKnown * 100) + '<small>%</small>' : '—';
+  document.getElementById('dRp').textContent = reports.length ? openRep : '—';
   const houseTotal = Math.max(1, houses.length);
-  const vneidPct = Math.round(tot.vn / houseTotal * 100);
-  const bhytPct = Math.round(tot.bh / houseTotal * 100);
+  const vneidPct = tot.vnKnown ? Math.round(tot.vn / tot.vnKnown * 100) : 0;
+  const bhytPct = tot.bhKnown ? Math.round(tot.bh / tot.bhKnown * 100) : 0;
   const reportTotal = Math.max(1, reports.length);
   const doneReportPct = Math.round((reports.length - openRep) / reportTotal * 100);
-  document.getElementById('prioritySupport').textContent = tot.sup + ' hộ';
-  document.getElementById('priorityReports').textContent = openRep + ' điểm';
-  document.getElementById('priorityVneid').textContent = (houses.length - tot.vn) + ' hộ';
-  document.getElementById('progressVneid').textContent = vneidPct + '%';
+  document.getElementById('prioritySupport').textContent = tot.supKnown ? tot.sup + ' hộ' : 'Chưa cập nhật';
+  document.getElementById('priorityReports').textContent = reports.length ? openRep + ' điểm' : 'Chưa có dữ liệu';
+  document.getElementById('priorityVneid').textContent = tot.vnKnown ? (tot.vnKnown - tot.vn) + ' hộ' : 'Chưa cập nhật';
+  document.getElementById('progressVneid').textContent = tot.vnKnown ? vneidPct + '%' : 'Chưa cập nhật';
   document.getElementById('progressVneidBar').style.width = vneidPct + '%';
-  document.getElementById('progressBhyt').textContent = bhytPct + '%';
+  document.getElementById('progressBhyt').textContent = tot.bhKnown ? bhytPct + '%' : 'Chưa cập nhật';
   document.getElementById('progressBhytBar').style.width = bhytPct + '%';
-  document.getElementById('progressReports').textContent = doneReportPct + '%';
+  document.getElementById('progressReports').textContent = reports.length ? doneReportPct + '%' : 'Chưa có dữ liệu';
   document.getElementById('progressReportsBar').style.width = doneReportPct + '%';
   const bd = tos.map((t, i) => ({name: t.name, mem: aggTo(t).mem, color: TO_COLORS[i % TO_COLORS.length]})).sort((a, b) => b.mem - a.mem);
   const max = Math.max(1, ...bd.map(b => b.mem));
@@ -433,7 +577,7 @@ function setView(view) {
   document.getElementById('dashboardView').classList.toggle('is-active', !showMap);
   document.getElementById('mapView').classList.toggle('is-active', showMap);
   document.querySelectorAll('header .nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
-  if (showMap) setTimeout(() => { map.invalidateSize(); resetMap(); }, 0);
+  if (showMap) setTimeout(() => { map.invalidateSize(); if (!demoMapMode && !pendingHouseFocus) resetMap(); }, 0);
 }
 window.setView = setView;
 
@@ -455,6 +599,7 @@ function openTab(t) {
 }
 window.openTab = openTab;
 function showTo(t) {
+  clearHouseFocus();
   const a = aggTo(t);
   const color = TO_COLORS[(t.id - 1) % TO_COLORS.length];
   const list = houses.filter(h => toOf(h) === t.id);
@@ -467,14 +612,25 @@ function showTo(t) {
     list.map(h => '<div class="row" onclick="showHouse(byId(\'' + h.id + '\'))"><b>' + h.id + '</b> · ' + esc(h.owner) + ' · ' + h.members + ' người · ' + (h.vneid ? '🟦VNeID' : '⬜') + (h.bhyt ? ' 🟩BHYT' : '') + (h.policy ? ' 🚩' : '') + (h.support ? ' 🆘' : '') + '</div>').join('');
 }
 window.showHouse = function(h) {
+  if (selectedHouseId !== h.id) focusHouse(h);
   const near = reports.filter(r => Math.abs(r.pos[0] - h.c[1]) < 0.0012 && Math.abs(r.pos[1] - h.c[0]) < 0.0012);
-  panel.innerHTML = '<h2>🏠 ' + esc(h.id) + '</h2>' +
-    kv('Chủ hộ (ẩn danh)', esc(h.owner)) + kv('Tổ', 'Tổ ' + toOf(h)) +
-    kv('Nhân khẩu', h.members) + kv('Người cao tuổi', h.elderly) + kv('Trẻ em', h.children) +
-    kv('Hộ chính sách', h.policy ? 'Có 🚩' : 'Không') + kv('Hộ cần hỗ trợ', h.support ? 'Có 🆘' : 'Không') +
+  const members = Array.isArray(h.memberDetails) ? h.memberDetails : [];
+  const memberRows = members.length ? members.map((m, i) => {
+    const isHead = !!m.head || i === 0;
+    const dob = m.dateOfBirthDisplay || m.dob || m.dateOfBirth || '';
+    const meta = [isHead ? 'Chủ hộ' : '', dob, m.gender || ''].filter(Boolean).join(' · ');
+    return '<div class="member-row"><b>' + (isHead ? '👑 ' : '') + esc(m.name || 'Chưa nhập dữ liệu') + '</b>' + (meta ? '<span>' + esc(meta) + '</span>' : '') + '</div>';
+  }).join('') : '<div class="empty" style="padding:8px 0">Chưa có danh sách thành viên</div>';
+  panel.innerHTML = '<div class="house-detail-head"><div class="eyebrow">Nhà & hộ dân</div><h2>' + esc(h.owner || 'Chưa nhập dữ liệu') + '</h2><div class="house-code">' + esc(h.id) + '</div></div>' +
+    '<span class="house-badge">HỘ DÂN</span><div class="house-id">' + esc(h.id) + '</div>' +
+    '<div class="house-stats"><div class="house-stat"><strong>' + h.members + '</strong><span>khẩu</span></div><div class="house-stat"><strong>' + (h.elderly || '—') + '</strong><span>NCT</span></div><div class="house-stat"><strong>' + (h.children || '—') + '</strong><span>trẻ em</span></div></div>' +
+    '<h3 class="house-section-title">Thông tin hộ</h3>' +
+    kv('Chủ hộ', esc(h.owner || 'Chưa nhập dữ liệu')) + kv('Số nhà', esc(h.householdNumber || '—')) + kv('Ghi chú', esc(h.address || 'Tổ ' + toOf(h) + ', Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng')) +
+    '<h3 class="house-section-title" style="margin-top:14px">Thành viên (' + (members.length || h.members) + ')</h3><div class="member-list">' + memberRows + '</div>' +
+    kv('Hộ chính sách', h.policy == null ? 'Chưa cập nhật' : (h.policy ? 'Có 🚩' : 'Không')) + kv('Hộ cần hỗ trợ', h.support == null ? 'Chưa cập nhật' : (h.support ? 'Có 🆘' : 'Không')) +
     kv('Thăm hỏi gần nhất', h.lastVisit || 'Chưa ghi nhận') +
-    '<div style="margin-top:6px"><b>VNeID mức 2:</b> ' + (h.vneid ? 'Đã định danh' : 'Chưa') + '</div>' + bar(h.vneid ? 100 : 8, '#2563eb') +
-    '<b>BHYT:</b> ' + (h.bhyt ? 'Đã có thẻ' : 'Chưa có') + bar(h.bhyt ? 100 : 8, '#16a34a') +
+    '<div style="margin-top:6px"><b>VNeID mức 2:</b> ' + (h.vneid == null ? 'Chưa cập nhật' : (h.vneid ? 'Đã định danh' : 'Chưa')) + '</div>' + bar(h.vneid == null ? 0 : (h.vneid ? 100 : 8), '#2563eb') +
+    '<b>BHYT:</b> ' + (h.bhyt == null ? 'Chưa cập nhật' : (h.bhyt ? 'Đã có thẻ' : 'Chưa có')) + bar(h.bhyt == null ? 0 : (h.bhyt ? 100 : 8), '#16a34a') +
     '<h3 style="margin:12px 0 6px">Phản ánh gần đây</h3>' +
     (near.length ? near.map(r => '<div class="rep">⚠️ ' + r.type + ' · <b>' + r.status + '</b></div>').join('') : '<div class="empty" style="padding:8px">Không có</div>') +
     '<div style="display:flex;gap:6px;margin-top:12px">' +
@@ -626,7 +782,7 @@ function printReport() {
   document.getElementById('reportArea').innerHTML =
     '<h2>ỦY BAN NHÂN DÂN XÃ HÒA TIẾN</h2>' +
     '<h2 style="text-align:center">BÁO CÁO NHÂN HỘ KHẨU – THÔN LỆ SƠN NAM</h2>' +
-    '<p>Ngày lập: ' + new Date().toLocaleDateString('vi-VN') + ' · Bản demo dữ liệu mô phỏng (Nghị định 13/2023/NĐ-CP)</p>' +
+    '<p>Ngày lập: ' + new Date().toLocaleDateString('vi-VN') + ' · Nguồn Import: backups/latest-drawn.json</p>' +
     '<table><tr><th>Tổ</th><th>Số hộ</th><th>Nhân khẩu</th><th>NCT</th><th>Trẻ em</th><th>Chính sách</th><th>Cần hỗ trợ</th></tr>' + rows + '</table>' +
     '<p><b>Tổng hợp:</b> ' + houses.length + ' hộ · ' + tot.mem + ' nhân khẩu · ' + tot.pol + ' hộ chính sách · ' + tot.sup + ' hộ cần hỗ trợ · ' + open.length + ' phản ánh đang xử lý.</p>' +
     '<p style="margin-top:40px;text-align:right">Trưởng thôn<br><i>(Ký, ghi rõ họ tên)</i></p>';
@@ -660,12 +816,12 @@ sBox.addEventListener('keydown', ev => {
 window.searchGo = function(id) {
   sRes.style.display = 'none'; sBox.value = '';
   const h = byId(id); if (!h) return;
+  pendingHouseFocus = id;
   openTab('chi'); showHouse(h);
   setTimeout(() => {
     map.invalidateSize();
-    map.flyTo([h.c[1], h.c[0]], 19, {duration: .7});
     houseLayer.eachLayer(l => { if (l.h && l.h.id === id) l.openPopup(); });
-  }, 90);
+  }, 180);
 };
 
 // ============ BỘ LỌC ============
@@ -689,19 +845,84 @@ function tog(k) {
 }
 
 // ============ DEMO 60S ============
-let demoRunning = false;
+let demoRunning = false, demoState = null;
+function demoOverlay(title, sub, index, total) {
+  const box = document.getElementById('demoOverlay');
+  box.classList.add('show');
+  document.getElementById('demoTitle').textContent = title;
+  document.getElementById('demoSub').textContent = sub;
+  document.getElementById('demoCount').textContent = index + '/' + total;
+  document.getElementById('demoProgress').style.width = Math.round(index / total * 100) + '%';
+}
+function showVillageOverview() {
+  clearHouseFocus();
+  setDemoFocus(null, null);
+  const total = houses.reduce((a, h) => ({mem: a.mem + h.members, eld: a.eld + h.elderly, kid: a.kid + h.children}), {mem: 0, eld: 0, kid: 0});
+  setView('map');
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('#tabs button')[0].classList.add('on');
+  panel.innerHTML = '<h2 style="color:#0f766e">🗺 Toàn cảnh Thôn Lệ Sơn Nam</h2>' +
+    '<div class="rep" style="border-color:#99f6e4;background:#f0fdfa">Ranh giới thôn và các tổ dân cư được lấy từ bản Import mới nhất.</div>' +
+    kv('Số nhà trên bản đồ', houses.length) + kv('Nhân khẩu đã nhập', total.mem) + kv('Người cao tuổi', total.eld) + kv('Trẻ em', total.kid) +
+    '<h3 style="margin:14px 0 6px">Các tổ dân cư</h3>' + tos.map(t => '<div class="row"><b>' + esc(t.name) + '</b> · ' + t.house_ids.length + ' nhà · ' + aggTo(t).mem + ' khẩu</div>').join('');
+  const villageBounds = villageBoundary ? L.latLngBounds(villageBoundary.map(p => [p[1], p[0]])) : null;
+  const villageCenter = villageBounds ? villageBounds.getCenter() : L.latLng(15.9606, 108.178);
+  map.invalidateSize({pan: false});
+  map.setView(villageCenter, 14, {animate: false});
+  requestAnimationFrame(() => {
+    if (villageBounds) map.flyToBounds(villageBounds.pad(0.08), {duration: 1.8, easeLinearity: .08, maxZoom: 15});
+    else map.flyTo(villageCenter, 15, {duration: 1.8, easeLinearity: .08});
+  });
+}
 window.startDemo = function() {
   if (demoRunning) return; demoRunning = true;
-  const steps = [];
-  tos.forEach((t, i) => steps.push(() => { openTab('chi'); showTo(t); }));
-  steps.push(() => { openTab('an'); anSinh(); });
-  steps.push(() => { openTab('rep'); repList(); });
-  steps.push(() => { openTab('bc'); baoCao(); });
-  let k = 0;
-  const tick = () => { if (k < steps.length) { steps[k++](); setTimeout(tick, 1700); } else demoRunning = false; };
-  map.flyTo([15.9606, 108.1855], 16);
-  setTimeout(tick, 700);
+  demoMapMode = true;
+  const steps = [{title: 'Toàn cảnh thôn', sub: 'Mở ranh giới Thôn Lệ Sơn Nam và tổng số liệu', run: showVillageOverview}];
+  tos.forEach(t => steps.push({title: t.name, sub: 'Zoom vào ranh tổ · xem hộ, khẩu, NCT và trẻ em', run: () => {
+    clearHouseFocus();
+    setDemoFocus(t.id, null);
+    openTab('chi'); showTo(t);
+    if (t.ring) {
+      const bounds = L.latLngBounds(t.ring.map(p => [p[1], p[0]]));
+      map.flyToBounds(bounds.pad(0.18), {duration: 2.4, easeLinearity: .06, maxZoom: 17});
+    }
+  }}));
+  const filled = houses.filter(h => h.members > 0).slice(0, 4);
+  filled.forEach(h => steps.push({title: h.owner, sub: h.id + ' · hồ sơ chủ hộ và thành viên', run: () => {
+    setDemoFocus(toOf(h), h.id);
+    openTab('chi'); showHouse(h); map.flyTo([h.c[1], h.c[0]], 20, {duration: 2.1, easeLinearity: .06});
+  }}));
+  steps.push({title: 'Báo cáo tổng hợp', sub: 'Kết thúc tour · tổng hợp theo từng tổ', run: () => { openTab('bc'); baoCao(); }});
+  demoState = {steps, index: 0};
+  runDemoStep();
 };
+function runDemoStep() {
+  if (!demoState) return;
+  const step = demoState.steps[demoState.index];
+  demoOverlay(step.title, step.sub, demoState.index + 1, demoState.steps.length);
+  step.run();
+}
+window.demoNext = function() {
+  if (!demoState) return;
+  if (demoState.index < demoState.steps.length - 1) { demoState.index++; runDemoStep(); }
+};
+window.demoPrev = function() {
+  if (!demoState) return;
+  if (demoState.index > 0) { demoState.index--; runDemoStep(); }
+};
+window.demoStop = function() {
+  demoRunning = false; demoState = null;
+  demoMapMode = false;
+  clearHouseFocus();
+  setDemoFocus(null, null);
+  document.getElementById('demoOverlay').classList.remove('show');
+};
+document.addEventListener('keydown', ev => {
+  if (!demoRunning) return;
+  if (ev.key === 'ArrowRight') { ev.preventDefault(); demoNext(); }
+  if (ev.key === 'ArrowLeft') { ev.preventDefault(); demoPrev(); }
+  if (ev.key === 'Escape') { ev.preventDefault(); demoStop(); }
+});
 
 // ============ KHỞI TẠO ============
 renderAll();

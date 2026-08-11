@@ -6,7 +6,8 @@
 - Tính năng: dashboard + biểu đồ (dân số theo tổ, nhóm tuổi) + map tương tác +
   search chủ hộ (zoom) + CRUD hộ + an sinh (thăm hỏi) + phản ánh + báo cáo in
 """
-import json, random, glob
+import json, glob
+from datetime import date, datetime
 
 # ---- Nguồn vẽ tay mới nhất ----
 files = sorted(glob.glob("backups/*.geojson"))
@@ -18,57 +19,51 @@ with open(SRC) as f:
 houses_raw = [ft for ft in drawn["features"] if ft["geometry"]["type"] == "Polygon"]
 print("houses:", len(houses_raw), "from", SRC)
 
-random.seed(42)
-LAST = ["Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Phan", "Võ", "Đặng", "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý"]
-FIRST = ["Văn A", "Thị B", "Văn C", "Thị D", "Văn E", "Thị F", "Văn G", "Thị H", "Văn K", "Thị L", "Văn M", "Thị N", "Văn P", "Thị Q"]
-
 def centroid(coords):
     xs = [p[0] for p in coords]; ys = [p[1] for p in coords]
     return sum(xs)/len(xs), sum(ys)/len(ys)
 
+with open("imports/households-headname.json", encoding="utf-8") as f:
+    household_rows = json.load(f).get("households", [])
+
+def age_from_dob(value):
+    try:
+        d = datetime.strptime(value, "%d/%m/%Y").date()
+    except ValueError:
+        return None
+    today = date.today()
+    return today.year - d.year - ((today.month, today.day) < (d.month, d.day))
+
 sim = []
 for i, ft in enumerate(houses_raw):
     c = centroid(ft["geometry"]["coordinates"][0])
-    members = random.randint(2, 7)
-    elderly = min(random.randint(0, 2), members)
-    children = min(random.randint(0, 3), members - elderly)
+    row = household_rows[i] if i < len(household_rows) else None
+    members_detail = (row or {}).get("members", [])
+    ages = [age_from_dob(m.get("dob", "")) for m in members_detail]
     sim.append({
         "id": "LSN-H%03d" % (i + 1),
-        "owner": "%s %s" % (random.choice(LAST), random.choice(FIRST)),
-        "members": members, "elderly": elderly, "children": children,
-        "policy": random.random() < 0.08, "support": random.random() < 0.12,
-        "vneid": random.random() < 0.78, "bhyt": random.random() < 0.92,
+        "owner": row.get("headName", "Chưa nhập dữ liệu") if row else "Chưa nhập dữ liệu",
+        "address": row.get("address", "") if row else "",
+        "memberDetails": members_detail,
+        "members": len(members_detail), "elderly": sum(a is not None and a >= 60 for a in ages),
+        "children": sum(a is not None and a < 18 for a in ages),
+        # Không có trong nguồn hộ dân hiện có: để null để giao diện hiển thị “chưa cập nhật”.
+        "policy": None, "support": None, "vneid": None, "bhyt": None,
         "geom": ft["geometry"]["coordinates"][0],
         "c": [c[0], c[1]],
     })
 
-# gom tổ theo kinh độ
-sim.sort(key=lambda h: h["c"][0])
-N = len(sim); k = 4
-tos = []
-for t in range(k):
-    grp = sim[t * N // k: (t + 1) * N // k]
-    if not grp:
-        continue
-    tos.append({"id": t + 1, "name": "Tổ %d" % (t + 1), "house_ids": [h["id"] for h in grp]})
+# Địa chỉ nguồn hiện xác nhận 65 hộ thuộc Tổ 3; nhà còn lại chưa có hồ sơ hộ.
+tos = [{"id": 3, "name": "Tổ 3", "house_ids": [h["id"] for h in sim if h["members"]]}]
 TO_OF = {}
 for t in tos:
     for hid in t["house_ids"]:
         TO_OF[hid] = t["id"]
 
-REPORT_TYPES = [("Đèn đường hỏng", "#f59e0b"), ("Đường xuống cấp", "#dc2626"),
-                ("Rác thải tồn đọng", "#16a34a"), ("Ngập nước", "#2563eb"), ("An ninh", "#7c3aed")]
 reports = []
-for r in range(10):
-    h = random.choice(sim)
-    t, color = REPORT_TYPES[r % len(REPORT_TYPES)]
-    reports.append({"id": "PR-%03d" % (r + 1), "type": t, "color": color,
-        "desc": "Phản ánh: %s – khu vực %s" % (t, h["id"]),
-        "pos": [h["c"][1] + random.uniform(-0.0003, 0.0003), h["c"][0] + random.uniform(-0.0003, 0.0003)],
-        "status": random.choice(["Mới", "Đang xử lý", "Đã xử lý"])})
 
 data = {"houses": sim, "tos": tos, "to_of": TO_OF, "reports": reports,
-        "meta": {"name": "Thôn Lệ Sơn Nam", "x": "Hòa Tiến, Hòa Vang, Đà Nẵng", "source": SRC, "n": N}}
+        "meta": {"name": "Thôn Lệ Sơn Nam", "x": "Hòa Tiến, Hòa Vang, Đà Nẵng", "source": SRC, "household_source": "imports/households-headname.json", "n": len(sim), "real_households": len(household_rows), "real_members": sum(len(h.get("members", [])) for h in household_rows)}}
 
 PAGE = r"""<!DOCTYPE html>
 <html lang="vi">
@@ -154,7 +149,7 @@ PAGE = r"""<!DOCTYPE html>
 <header>
   <h1>🏡 LỆ SƠN NAM SMART VILLAGE</h1>
   <span class="sub">Quản lý nhân hộ khẩu thông minh · Hòa Tiến, Hòa Vang, Đà Nẵng</span>
-  <span class="badge">DEMO – dữ liệu mô phỏng</span>
+  <span class="badge">DỮ LIỆU THẬT · 65 HỘ / 232 NHÂN KHẨU</span>
   <input id="searchBox" placeholder="🔍 Tìm chủ hộ / mã hộ..." autocomplete="off">
   <div id="searchRes"></div>
   <button class="btn" onclick="openTab('an')">🤝 An sinh</button>
@@ -207,7 +202,7 @@ PAGE = r"""<!DOCTYPE html>
   </div>
 </div>
 <footer>
-  <b>Lệ Sơn Nam Smart Village</b> – demo quản lý cho Trưởng thôn · dữ liệu hộ MÔ PHỎNG (Nghị định 13/2023) · vị trí nhà thật từ bản đồ vẽ tay
+  <b>Lệ Sơn Nam Smart Village</b> – dữ liệu hộ từ imports/households-headname.json · vị trí nhà từ bản đồ vẽ tay · VNeID/BHYT/chính sách/phản ánh chưa có nguồn nên để “chưa cập nhật”
 </footer>
 <div id="reportArea"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -505,7 +500,7 @@ function printReport() {
   document.getElementById('reportArea').innerHTML =
     '<h2>ỦY BAN NHÂN DÂN XÃ HÒA TIẾN</h2>' +
     '<h2 style="text-align:center">BÁO CÁO NHÂN HỘ KHẨU – THÔN LỆ SƠN NAM</h2>' +
-    '<p>Ngày lập: ' + new Date().toLocaleDateString('vi-VN') + ' · Bản demo dữ liệu mô phỏng (Nghị định 13/2023/NĐ-CP)</p>' +
+    '<p>Ngày lập: ' + new Date().toLocaleDateString('vi-VN') + ' · Nguồn hộ thật: imports/households-headname.json</p>' +
     '<table><tr><th>Tổ</th><th>Số hộ</th><th>Nhân khẩu</th><th>NCT</th><th>Trẻ em</th><th>Chính sách</th><th>Cần hỗ trợ</th></tr>' + rows + '</table>' +
     '<p><b>Tổng hợp:</b> ' + houses.length + ' hộ · ' + tot.mem + ' nhân khẩu · ' + tot.pol + ' hộ chính sách · ' + tot.sup + ' hộ cần hỗ trợ · ' + open.length + ' phản ánh đang xử lý.</p>' +
     '<p style="margin-top:40px;text-align:right">Trưởng thôn<br><i>(Ký, ghi rõ họ tên)</i></p>';

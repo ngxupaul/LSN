@@ -143,6 +143,12 @@
             border:1px solid var(--line); line-height:1.9; }
   .legend i { display:inline-block; width:13px; height:13px; margin-right:7px; vertical-align:-2px;
               border-radius:3px; }
+  .to-label-host { background:transparent; border:0; }
+  .to-label { display:inline-flex; align-items:center; justify-content:center; min-width:46px; height:30px; padding:0 10px;
+              border:3px solid #fff; border-radius:999px; color:#fff; font:900 14px/1 system-ui, sans-serif;
+              letter-spacing:.2px; text-shadow:0 2px 3px rgba(0,0,0,.75); box-shadow:0 3px 10px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.35);
+              transform:translate(-50%,-50%); white-space:nowrap; }
+  .to-label.is-active { min-width:58px; height:36px; font-size:17px; border-width:4px; box-shadow:0 0 0 5px rgba(255,255,255,.38), 0 5px 16px rgba(0,0,0,.55); }
   .btn2 { padding:7px 14px; border:none; border-radius:9px; cursor:pointer; font:600 13px system-ui; background:var(--primary); color:#fff; }
   .btn2.gray { background:#f3f4f6; color:var(--text); }
   ::-webkit-scrollbar { width:9px; height:9px; }
@@ -277,6 +283,7 @@ L.control.layers(
 const STORE_KEY = 'lesonnam_household_v3';
 const drawn = L.featureGroup().addTo(map);      // nhà
 const totLayer = L.featureGroup().addTo(map);   // tổ
+const toLabelLayer = L.layerGroup().addTo(map); // nhãn tổ luôn nổi trên polygon
 // Bảng màu cho từng tổ (mỗi tổ 1 màu riêng, lặp lại khi quá 12 tổ)
 const TO_COLORS = ['#e67e22', '#2980b9', '#27ae60', '#8e44ad', '#c0392b', '#16a085',
                    '#d35400', '#2c3e50', '#7d6608', '#5dade2', '#e84393', '#00b894'];
@@ -288,6 +295,20 @@ function nextToColor() {
   return TO_COLORS[totLayer.getLayers().length % TO_COLORS.length];
 }
 function toColor(n) { return TO_COLORS[n % TO_COLORS.length]; }
+function addToLabel(layer) {
+  const p = props(layer);
+  const color = p.color || '#166534';
+  const label = String(p.name || 'Tổ').replace(/^Tổ\s*/i, 'Tổ ');
+  L.marker(layer.getBounds().getCenter(), {
+    interactive: false,
+    zIndexOffset: 1200,
+    icon: L.divIcon({className: 'to-label-host', html: '<div class="to-label" style="background:' + color + '">' + esc(label) + '</div>', iconSize: [0, 0], iconAnchor: [0, 0]})
+  }).addTo(toLabelLayer);
+}
+function refreshToLabels() {
+  toLabelLayer.clearLayers();
+  totLayer.eachLayer(addToLabel);
+}
 const mocLayer = L.featureGroup().addTo(map);   // mốc
 let uid = 1;
 let houseSeq = 0;   // bộ đếm ID nhà (LSN-H001...)
@@ -296,7 +317,7 @@ function props(l) { return (l.feature && l.feature.properties) || {}; }
 function esc(s) { return String(s == null ? '' : s).replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 function num(v) { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
 const SERVER_BACKUP_URL = 'backups/latest-drawn.json';
-const SEED_DATA_URL = 'backups/le-son-nam-2026-08-09-69nha-6fill.json';
+const SEED_DATA_URL = 'backups/latest-drawn.json';
 function featureId(f) {
   const p = f && f.properties || {};
   if (p.type === 'to' || p.type === 'thon' || (f && f.geometry && f.geometry.type === 'Point')) return '';
@@ -700,12 +721,26 @@ function showDetail(kind, l) {
   document.body.classList.add('detail-open');
   setTimeout(() => map.invalidateSize({pan: false}), 260);
   if (l.bringToFront) l.bringToFront();
+  if (detailKind === 'house') focusDrawnHouse(l);
+  else clearDrawnHouseFocus();
+}
+function focusDrawnHouse(target) {
+  drawn.eachLayer(h => {
+    if (!h._normalStyle) h._normalStyle = {color: h.options.color, weight: h.options.weight, fillColor: h.options.fillColor, fillOpacity: h.options.fillOpacity, opacity: h.options.opacity};
+    const active = h === target;
+    h.setStyle(active ? {color:'#f97316', weight:5, fillColor:'#f97316', fillOpacity:.9, opacity:1} : {weight:1, fillOpacity:.08, opacity:.2});
+  });
+  map.flyTo(target.getBounds().getCenter(), 20, {duration:1.8, easeLinearity:.08});
+}
+function clearDrawnHouseFocus() {
+  drawn.eachLayer(h => { if (h._normalStyle) h.setStyle(h._normalStyle); });
 }
 function closeDetail() {
   detailPanel.classList.remove('open');
   document.body.classList.remove('detail-open');
   detailLayer = null;
   detailKind = '';
+  clearDrawnHouseFocus();
   setTimeout(() => map.invalidateSize({pan: false}), 260);
 }
 function houseAtPoint(latlng) {
@@ -883,6 +918,7 @@ function addFeature(f) {
     f.properties.color = color;
     l.setStyle({color: color, weight: 2.5, fillColor: color, fillOpacity: .3});
     totLayer.addLayer(l);
+    addToLabel(l);
   } else if (f.properties && f.properties.type === 'thon') {
     l.setStyle({color: '#b91c1c', weight: 3.5, fillColor: '#fca5a5', fillOpacity: .12, dashArray: '8 4'});
     thonLayer.addLayer(l);
