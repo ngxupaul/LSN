@@ -21,35 +21,98 @@
   header .btn { background:#f5f8f6; color:var(--t); border:1px solid var(--line); border-radius:8px; padding:7px 10px; font:650 12px system-ui; cursor:pointer; transition:background .15s,border-color .15s,color .15s,transform .15s; }
   header .btn:hover { background:#e8f3ed; border-color:#b9d7ca; color:var(--g-dark); transform:translateY(-1px); }
   header .nav-btn.active { background:#e4f3ed; border-color:#a8d6c4; color:var(--g-dark); }
-  #searchBox { padding:8px 12px; border:1px solid var(--line); background:#fbfdfc; border-radius:8px; width:220px; font:13px system-ui; outline:none; }
+  .search-wrap { position:relative; flex:0 0 220px; min-width:0; z-index:2100; }
+  #searchBox { display:block; padding:8px 12px; border:1px solid var(--line); background:#fbfdfc; border-radius:8px; width:100%; font:13px system-ui; outline:none; }
   #searchBox:focus { border-color:var(--g); box-shadow:0 0 0 3px rgba(22,131,108,.12); }
-  #searchRes { position:absolute; top:52px; right:16px; width:300px; background:#fff; color:var(--t); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); max-height:300px; overflow-y:auto; display:none; z-index:2000; }
-  #searchRes .r { padding:8px 12px; border-bottom:1px solid #f3f4f6; cursor:pointer; font-size:12.5px; }
+  #searchRes { position:absolute; top:calc(100% + 8px); left:0; width:min(420px, calc(100vw - 24px)); max-width:calc(100vw - 24px); background:#fff; color:var(--t); border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 28px rgba(26,53,43,.18); max-height:min(320px, calc(100vh - 96px)); overflow-y:auto; display:none; z-index:2200; }
+  #searchRes .r { padding:9px 12px; border-bottom:1px solid #f3f4f6; cursor:pointer; font-size:12.5px; line-height:1.35; overflow-wrap:anywhere; }
   #searchRes .r:hover { background:#f0fdf4; }
-  #top { background:var(--canvas); border-bottom:1px solid var(--line); padding:14px 18px 16px; position:relative; z-index:1050; }
-  #overviewHead { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  #top { background:linear-gradient(180deg,#edf8f2 0%,var(--canvas) 100%); border-bottom:1px solid var(--line); padding:20px 28px 18px; position:relative; z-index:1050; }
+  #overviewHead { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; }
   #overviewHead .eyebrow { color:var(--g-dark); font-size:10px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; }
-  #overviewHead h2 { font-size:19px; letter-spacing:-.2px; margin:3px 0 0; }
+  #overviewHead h2 { font-size:24px; letter-spacing:-.5px; margin:4px 0 0; }
   #overviewHead .sync { color:var(--m); font-size:11px; white-space:nowrap; }
   #overviewHead .sync-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#28a276; margin-right:5px; box-shadow:0 0 0 3px rgba(40,162,118,.12); }
-  #dash { display:flex; gap:10px; overflow-x:auto; }
-  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 13px; min-width:122px; box-shadow:var(--shadow); }
+  #dash { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+  .card { background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:14px; padding:14px 15px; min-width:0; box-shadow:0 8px 20px rgba(26,53,43,.06); }
   .card .lbl { font-size:10px; color:var(--m); font-weight:700; letter-spacing:.1px; }
-  .card .val { font-size:21px; line-height:1.1; font-weight:800; margin-top:5px; color:var(--t); }
+  .card .val { font-size:24px; line-height:1.1; font-weight:850; margin-top:7px; color:var(--t); }
   .card .val small { font-size:10px; font-weight:600; color:var(--m); }
   .card.hot { border-left:4px solid var(--r); }
   .card.warn { border-left:4px solid var(--y); }
   .card.ok { border-left:4px solid var(--g); }
-  #charts { display:flex; gap:12px; margin-top:12px; }
-  .chartbox { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 13px; flex:1; min-width:0; box-shadow:var(--shadow); }
-  .chartbox h4 { margin:0 0 8px; font-size:12px; color:var(--t); font-weight:750; }
+  .card.featured { background:linear-gradient(135deg,#0b5f4d,#16836c); border-color:#0b5f4d; color:#fff; }
+  .card.featured .lbl, .card.featured .val, .card.featured .val small { color:#fff; }
+  #charts { display:grid; grid-template-columns:1.25fr .75fr; gap:14px; margin-top:14px; }
+  .chartbox { background:rgba(255,255,255,.94); border:1px solid var(--line); border-radius:16px; padding:15px 17px; min-width:0; box-shadow:0 8px 22px rgba(26,53,43,.06); }
+  .chart-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:11px; }
+  .chartbox h4 { margin:0; font-size:13px; color:var(--t); font-weight:800; }
+  .chart-meta { color:var(--m); font-size:10.5px; text-align:right; white-space:nowrap; }
+  .chart-note { display:flex; align-items:center; gap:7px; margin-top:11px; padding:7px 9px; border-radius:9px; background:#fff8e6; color:#8b5c08; font-size:10.5px; line-height:1.35; }
+  .chart-note i { width:7px; height:7px; flex:none; border-radius:50%; background:#e4a721; }
+  .demographic-foot { display:grid; grid-template-columns:96px 1fr; align-items:center; gap:14px; min-height:126px; }
+  .demographic-copy { display:grid; gap:7px; }
+  .demo-metric { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:11.5px; }
+  .demo-metric span:first-child { color:var(--m); }
+  .demo-metric b { color:var(--t); }
+  .demo-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
   .app-view { flex:1 1 auto; min-height:0; }
   .app-view:not(.is-active) { display:none; }
   #dashboardView { background:var(--canvas); overflow-y:auto; }
   #mapView { display:flex; flex-direction:column; }
   #mapView:not(.is-active) { display:none; }
-  #dashboardGrid { display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:12px; padding:0 18px 18px; }
-  .dash-panel { background:#fff; border:1px solid var(--line); border-radius:10px; padding:15px; box-shadow:var(--shadow); min-width:0; }
+  #dashboardGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; padding:16px 28px 28px; }
+  .dash-panel { background:#fff; border:1px solid var(--line); border-radius:16px; padding:17px; box-shadow:0 8px 22px rgba(26,53,43,.06); min-width:0; }
+  .dash-panel.compact { min-height:188px; }
+  .dash-panel .panel-kicker { color:var(--g-dark); font-size:10px; font-weight:850; letter-spacing:1px; text-transform:uppercase; }
+  .dash-panel .panel-title { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .dash-panel .panel-title h3 { margin:3px 0 0; font-size:16px; }
+  .insight-list, .quality-list { display:grid; gap:8px; }
+  .insight-row, .quality-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 10px; border-radius:10px; background:#f5faf7; font-size:11.5px; }
+  .insight-row span:first-child, .quality-row span:first-child { color:var(--m); }
+  .insight-row b, .quality-row b { color:var(--g-dark); white-space:nowrap; }
+  .quality-row.warn { background:#fff8e6; }
+  .quality-row.warn b { color:#9a650a; }
+  .map-panel { background:linear-gradient(135deg,#e8f5ef,#d8eee5); border-color:#c1dfd2; }
+  .map-panel p { max-width:42ch; }
+  .map-panel .dash-cta { margin-top:18px; }
+  .chat-panel { grid-column:1 / -1; background:linear-gradient(135deg,#062f2a 0%,#0b5f4d 58%,#16836c 100%); border-color:#0b5f4d; color:#f0fdf4; overflow:hidden; position:relative; }
+  .chat-panel::after { content:""; position:absolute; width:220px; height:220px; right:-80px; top:-100px; border-radius:50%; background:rgba(255,255,255,.08); pointer-events:none; }
+  .chat-header { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:13px; position:relative; z-index:1; }
+  .chat-brand { display:flex; align-items:center; gap:10px; }
+  .chat-avatar { width:35px; height:35px; display:grid; place-items:center; border-radius:12px; background:#d1fae5; color:#065f46; font:900 14px system-ui; box-shadow:0 5px 14px rgba(0,0,0,.18); flex:none; }
+  .chat-panel h3, .chat-panel .eyebrow { color:#fff; }
+  .chat-panel h3 { margin-top:3px; }
+  .chat-caption { color:#b7ead2; font-size:10.5px; margin-top:2px; }
+  .chat-connection { display:flex; align-items:center; gap:6px; padding:6px 9px; border:1px solid rgba(255,255,255,.22); border-radius:99px; background:rgba(0,0,0,.12); color:#d6fae9; font-size:10.5px; white-space:nowrap; }
+  .chat-live-dot { width:7px; height:7px; border-radius:50%; background:#fbbf24; box-shadow:0 0 0 4px rgba(251,191,36,.16); }
+  .chat-status { color:inherit; font-size:10.5px; }
+  .chat-messages { display:grid; align-content:start; gap:12px; max-height:350px; min-height:92px; overflow-y:auto; padding:7px 6px 12px; position:relative; z-index:1; scrollbar-color:rgba(255,255,255,.35) transparent; }
+  .chat-message { display:flex; align-items:flex-end; gap:8px; max-width:min(820px,84%); animation:chatMessageIn .28s ease both; }
+  .chat-message.user { justify-self:end; flex-direction:row-reverse; }
+  .chat-message-avatar { width:25px; height:25px; display:grid; place-items:center; border-radius:9px; background:rgba(255,255,255,.18); color:#d1fae5; font:800 9px system-ui; flex:none; }
+  .chat-message.user .chat-message-avatar { background:#bbf7d0; color:#065f46; }
+  .chat-bubble { padding:11px 14px; border-radius:15px 15px 15px 5px; font-size:12.5px; line-height:1.55; white-space:normal; overflow-wrap:anywhere; box-shadow:0 5px 15px rgba(0,0,0,.1); }
+  .chat-bubble.assistant { background:#f4fbf7; border:1px solid rgba(255,255,255,.72); color:#173b34; }
+  .chat-bubble.user { padding:8px 12px; background:#d1fae5; color:#064e3b; border-radius:15px 15px 5px 15px; }
+  .chat-rich p { margin:0; }
+  .chat-rich-title { margin:0 0 5px; color:#075f4c; font-size:13px; line-height:1.35; }
+  .chat-rich strong { color:#075f4c; font-weight:800; }
+  .chat-rich code { padding:1px 4px; border-radius:4px; background:#dcefe6; color:#075f4c; font:600 11px ui-monospace,monospace; }
+  .chat-list { display:grid; gap:4px; margin:2px 0; }
+  .chat-list-item { display:grid; grid-template-columns:12px minmax(0,1fr); gap:3px; }
+  .chat-list-mark { color:#0b8065; font-weight:900; }
+  .chat-gap { height:6px; }
+  @keyframes chatMessageIn { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+  .chat-form { display:flex; gap:8px; margin-top:8px; padding:5px; border:1px solid rgba(255,255,255,.24); border-radius:13px; background:rgba(0,0,0,.14); position:relative; z-index:1; }
+  .chat-form textarea { flex:1; min-height:40px; max-height:88px; resize:vertical; border:0; outline:none; border-radius:9px; padding:8px 9px; background:transparent; font:13px system-ui; color:#f8fffb; }
+  .chat-form textarea::placeholder { color:#b7dacf; }
+  .chat-form button { width:74px; border:0; border-radius:10px; padding:0 12px; background:#fbbf24; color:#78350f; font:800 12px system-ui; cursor:pointer; transition:transform .15s,box-shadow .15s; }
+  .chat-form button:hover { transform:translateY(-1px); box-shadow:0 5px 12px rgba(251,191,36,.28); }
+  .chat-form button:disabled { opacity:.55; cursor:wait; }
+  .chat-quick { display:flex; gap:6px; flex-wrap:wrap; margin-top:5px; position:relative; z-index:1; }
+  .chat-quick button { border:1px solid rgba(255,255,255,.3); border-radius:99px; padding:6px 10px; background:rgba(255,255,255,.08); color:#ecfdf5; font:650 11px system-ui; cursor:pointer; transition:background .15s,transform .15s; }
+  .chat-quick button:hover { background:rgba(255,255,255,.18); transform:translateY(-1px); }
   .dash-panel.accent { background:#e1f1eb; border-color:#c1dfd2; }
   .dash-panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
   .dash-panel h3 { font-size:15px; margin:3px 0 0; }
@@ -90,7 +153,31 @@
   #tabs button { flex:1; border:none; background:transparent; padding:11px 2px 10px; font:650 11px system-ui; cursor:pointer; color:var(--m); border-bottom:2.5px solid transparent; }
   #tabs button.on { color:var(--g-dark); border-bottom-color:var(--g); background:#fff; }
   #panel { flex:1; overflow-y:auto; padding:15px; font-size:13px; }
+  #panel > * { animation:panelReveal .42s cubic-bezier(.22,.8,.25,1) both; }
+  #panel > *:nth-child(2) { animation-delay:.05s; }
+  #panel > *:nth-child(3) { animation-delay:.1s; }
+  #panel > *:nth-child(4) { animation-delay:.15s; }
+  #dashboardView.is-active .dash-panel { animation:dashRise .55s cubic-bezier(.22,.8,.25,1) both; }
+  #dashboardView.is-active .dash-panel:nth-child(2) { animation-delay:.08s; }
+  #dashboardView.is-active .dash-panel:nth-child(3) { animation-delay:.16s; }
+  @keyframes panelReveal { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes dashRise { from { opacity:0; transform:translateY(18px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
   #panel h2 { margin:0 0 10px; font-size:15.5px; }
+  .house-detail-head { margin:-15px -15px 14px; padding:16px 15px 14px; background:linear-gradient(135deg,#f3fbf7,#fff); border-bottom:1px solid #e3eee8; }
+  .house-detail-head .eyebrow { color:var(--g-dark); font-size:10px; font-weight:850; letter-spacing:1.1px; text-transform:uppercase; }
+  .house-detail-head h2 { margin:5px 0 2px; font-size:21px; letter-spacing:-.25px; }
+  .house-code { color:#7c3aed; font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .house-badge { display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; background:#dcfce7; color:#166534; font-size:11px; font-weight:800; letter-spacing:.3px; }
+  .house-id { color:#7c3aed; font:600 13px ui-monospace,SFMono-Regular,Menlo,monospace; margin:7px 0 12px; }
+  .house-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:0 0 16px; }
+  .house-stat { min-width:0; padding:9px 5px 8px; border:1px solid #c9f3d8; border-radius:12px; background:#f0fdf4; text-align:center; }
+  .house-stat strong { display:block; color:#166534; font-size:22px; line-height:1.05; }
+  .house-stat span { display:block; color:#71817a; font-size:10.5px; margin-top:4px; }
+  .house-section-title { margin:0 0 8px; font-size:14px; }
+  .house-photo { margin:0 -2px 14px; border-radius:13px; overflow:hidden; border:1px solid #d7e8df; background:#eaf5ef; box-shadow:0 8px 20px rgba(20,80,57,.12); }
+  .house-photo img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
+  .house-photo figcaption { padding:7px 9px; color:#5f766d; font-size:10.5px; background:#f7fcf9; }
+  .house-detail-head + .house-badge + .house-id + .house-stats + .house-section-title { margin-top:0; }
   .kv { display:flex; justify-content:space-between; padding:3.5px 0; border-bottom:1px dashed #eee; }
   .kv b { font-weight:700; }
   .bar { height:8px; background:#eef2f7; border-radius:99px; margin:3px 0 8px; overflow:hidden; }
@@ -112,6 +199,19 @@
   .legend { position:absolute; z-index:900; bottom:14px; right:14px; background:rgba(255,255,255,.95); border:1px solid var(--line); border-radius:12px; padding:8px 11px; font-size:11.5px; box-shadow:var(--shadow); line-height:1.9; }
   .legend i { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:6px; vertical-align:-2px; }
   footer { flex:none; background:#153d33; border-top:0; font-size:11px; line-height:1.35; color:#d6e8df; padding:6px 18px; }
+  #demoOverlay { position:absolute; z-index:1300; top:14px; left:50%; transform:translateX(-50%); min-width:330px; max-width:calc(100% - 32px); background:rgba(6,95,70,.96); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:16px; padding:10px 14px 12px; box-shadow:0 10px 30px rgba(0,0,0,.28); display:none; pointer-events:auto; }
+  #demoOverlay.show { display:block; animation:demoIn .45s ease both; }
+  #demoOverlay .demo-title { display:flex; justify-content:space-between; gap:12px; font-weight:800; font-size:13px; }
+  #demoOverlay .demo-sub { margin-top:3px; font-size:11px; opacity:.85; }
+  #demoOverlay .demo-track { height:6px; margin-top:9px; border-radius:99px; background:rgba(255,255,255,.25); overflow:hidden; }
+  #demoOverlay .demo-track i { display:block; height:100%; width:0; border-radius:99px; background:#fbbf24; transition:width .7s ease; }
+  #demoOverlay .demo-controls { display:flex; gap:6px; margin-top:9px; }
+  #demoOverlay .demo-controls button { flex:1; border:0; border-radius:8px; padding:5px 8px; cursor:pointer; color:#064e3b; background:#ecfdf5; font:700 11px system-ui; }
+  #demoOverlay .demo-controls button:last-child { background:#fef3c7; color:#78350f; }
+  .demo-focus { animation:demoPulse 1.4s ease-in-out infinite !important; }
+  .to-map-label { display:inline-flex; align-items:center; justify-content:center; min-width:52px; height:32px; padding:0 11px; border:3px solid #fff; border-radius:999px; color:#fff; font:900 14px/1 system-ui,sans-serif; letter-spacing:.2px; text-shadow:0 2px 3px rgba(0,0,0,.8); box-shadow:0 3px 10px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.35); transform:translate(-50%,-50%); white-space:nowrap; }
+  @keyframes demoIn { from { opacity:0; transform:translate(-50%,-12px) scale(.96); } to { opacity:1; transform:translate(-50%,0) scale(1); } }
+  @keyframes demoPulse { 0%,100% { filter:drop-shadow(0 0 0 rgba(251,191,36,0)); } 50% { filter:drop-shadow(0 0 12px rgba(251,191,36,.95)); } }
   footer b { color:#fff; }
   #reportArea { display:none; }
   @media print {
@@ -129,15 +229,20 @@
     .brand-mark { width:31px; height:31px; }
     header h1 { font-size:14px; }
     .header-actions { width:100%; margin-left:0; justify-content:flex-start; gap:6px; }
-    #searchRes { top:calc(100% - 1px); left:14px; right:14px; width:auto; }
+    .search-wrap { order:1; flex:1 1 190px; width:100%; }
+    #searchRes { top:calc(100% + 6px); left:0; width:100%; max-width:100%; max-height:280px; }
     header .badge { order:0; }
-    header #searchBox { order:1; flex:1 1 190px; width:auto; min-width:0; }
     header .btn { order:2; padding:7px 9px; }
     #top { padding:8px 14px; }
     #overviewHead { align-items:flex-start; margin-bottom:10px; }
     #overviewHead h2 { font-size:16px; }
     #overviewHead .sync { font-size:10px; text-align:right; white-space:normal; max-width:120px; }
-    #charts { gap:10px; }
+    #dash { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .card { padding:11px 12px; }
+    .card .val { font-size:20px; }
+    .chat-header { align-items:flex-start; flex-direction:column; gap:8px; }
+    .chat-connection { align-self:flex-start; }
+    #charts { grid-template-columns:1fr; gap:10px; }
     .chartbox { padding:8px; }
     #dashboardGrid { grid-template-columns:1fr; gap:10px; padding:0 14px 14px; }
     .dash-panel { padding:13px; }
@@ -156,10 +261,12 @@
     <span class="brand-mark" aria-hidden="true">LS</span>
     <div><h1>LỆ SƠN NAM SMART VILLAGE</h1><span class="sub">Quản lý nhân hộ khẩu · Hòa Tiến, Hòa Vang, Đà Nẵng</span></div>
   </div>
-  <span class="badge">DEMO · DỮ LIỆU MÔ PHỎNG</span>
+  <span class="badge" id="dataBadge">DỮ LIỆU BẢN ĐỒ · 70 NHÀ / 57 NHÂN KHẨU</span>
   <div class="header-actions">
-    <input id="searchBox" aria-label="Tìm chủ hộ hoặc mã hộ" placeholder="⌕  Tìm chủ hộ / mã hộ..." autocomplete="off">
-    <div id="searchRes"></div>
+    <div class="search-wrap">
+      <input id="searchBox" aria-label="Tìm chủ hộ hoặc mã hộ" placeholder="⌕  Tìm chủ hộ / mã hộ..." autocomplete="off">
+      <div id="searchRes"></div>
+    </div>
     <button class="btn nav-btn active" data-view="dashboard" onclick="setView('dashboard')">▦ Dashboard</button>
     <button class="btn nav-btn" data-view="map" onclick="setView('map')">⌖ Bản đồ</button>
     <button class="btn" onclick="openTab('an')">🤝 An sinh</button>
@@ -171,65 +278,76 @@
 <div id="dashboardView" class="app-view is-active">
 <div id="top">
   <div id="overviewHead">
-    <div><div class="eyebrow">Toàn cảnh vận hành</div><h2>Lệ Sơn Nam hôm nay</h2></div>
-    <div class="sync"><span class="sync-dot"></span> Dữ liệu mô phỏng · cập nhật hôm nay</div>
+    <div><div class="eyebrow">Toàn cảnh dân cư</div><h2>Lệ Sơn Nam hôm nay</h2></div>
+    <div class="sync"><span class="sync-dot"></span> Excel import · cập nhật 12/08/2026</div>
   </div>
   <div id="dash">
     <div class="card"><div class="lbl">Tổng hộ dân</div><div class="val" id="dHos">–</div></div>
-    <div class="card ok"><div class="lbl">Nhân khẩu</div><div class="val" id="dMem">–</div></div>
+    <div class="card featured"><div class="lbl">Nhân khẩu</div><div class="val" id="dMem">–</div></div>
     <div class="card"><div class="lbl">Người cao tuổi</div><div class="val" id="dEld">–</div></div>
     <div class="card"><div class="lbl">Trẻ em</div><div class="val" id="dKid">–</div></div>
-    <div class="card warn"><div class="lbl">Hộ chính sách</div><div class="val" id="dPol">–</div></div>
-    <div class="card hot"><div class="lbl">Hộ cần hỗ trợ</div><div class="val" id="dSup">–</div></div>
-    <div class="card ok"><div class="lbl">VNeID mức 2</div><div class="val" id="dVn">–</div></div>
-    <div class="card hot"><div class="lbl">Phản ánh đang xử lý</div><div class="val" id="dRp">–</div></div>
+    <div class="card"><div class="lbl">Quy mô hộ bình quân</div><div class="val" id="dAvg">–</div></div>
   </div>
   <div id="charts">
-    <div class="chartbox"><h4>📊 Dân số theo tổ (người)</h4><div id="barChart"></div></div>
-    <div class="chartbox"><h4>👥 Nhóm tuổi</h4><div class="donut" id="donut"></div>
-      <div class="donut-l" id="donutL"></div></div>
+    <div class="chartbox population-chart">
+      <div class="chart-head"><h4>📊 Dân số theo tổ</h4><span class="chart-meta" id="toCoverage">Đang kiểm tra…</span></div>
+      <div id="barChart"></div>
+    </div>
+    <div class="chartbox age-chart">
+      <div class="chart-head"><h4>👥 Cơ cấu dân số</h4><span class="chart-meta">Theo ngày sinh trong Excel</span></div>
+      <div class="demographic-foot"><div class="donut" id="donut"></div><div class="demographic-copy" id="donutL"></div></div>
+    </div>
   </div>
 </div>
 <div id="dashboardGrid">
-  <section class="dash-panel">
-    <div class="dash-panel-head"><div><div class="eyebrow">Ưu tiên hôm nay</div><h3>Việc cần xử lý</h3></div><button class="link-btn" onclick="openTab('an')">Mở an sinh →</button></div>
-    <div class="action-list">
-      <button class="action-row" onclick="openTab('an')"><span class="action-label"><span class="action-icon">🆘</span>Hộ cần hỗ trợ</span><span class="action-value" id="prioritySupport">–</span></button>
-      <button class="action-row" onclick="openTab('rep')"><span class="action-label"><span class="action-icon">⚠</span>Phản ánh chưa hoàn tất</span><span class="action-value" id="priorityReports">–</span></button>
-      <button class="action-row" onclick="openTab('ho')"><span class="action-label"><span class="action-icon">▣</span>Hộ chưa định danh VNeID</span><span class="action-value" id="priorityVneid">–</span></button>
-    </div>
+  <section class="dash-panel compact">
+    <div class="panel-title"><div><div class="panel-kicker">Tóm tắt nhanh</div><h3>Điểm nổi bật</h3></div><span class="sync"><span class="sync-dot"></span> Đã đối chiếu</span></div>
+    <div class="insight-list" id="dashboardInsight"></div>
   </section>
-  <section class="dash-panel">
-    <div class="dash-panel-head"><div><div class="eyebrow">Mức độ hoàn thiện</div><h3>Chỉ số số hóa</h3></div><button class="link-btn" onclick="openTab('bc')">Xem báo cáo →</button></div>
-    <div class="progress-list">
-      <div class="progress-item"><div class="progress-meta"><span>VNeID mức 2</span><span id="progressVneid">–</span></div><div class="progress-track blue"><i id="progressVneidBar" style="width:0%"></i></div></div>
-      <div class="progress-item"><div class="progress-meta"><span>BHYT hộ dân</span><span id="progressBhyt">–</span></div><div class="progress-track"><i id="progressBhytBar" style="width:0%"></i></div></div>
-      <div class="progress-item"><div class="progress-meta"><span>Phản ánh đã xử lý</span><span id="progressReports">–</span></div><div class="progress-track amber"><i id="progressReportsBar" style="width:0%"></i></div></div>
-    </div>
+  <section class="dash-panel compact">
+    <div class="panel-title"><div><div class="panel-kicker">Chất lượng nguồn</div><h3>Cần bổ sung / rà soát</h3></div></div>
+    <div class="quality-list" id="qualitySummary"></div>
   </section>
-  <section class="dash-panel accent">
-    <div class="eyebrow">Không gian dữ liệu</div><h3>Mở bản đồ dân cư</h3>
-    <p>Xem vị trí 66 hộ mô phỏng, ranh giới tổ, điểm phản ánh và thông tin an sinh trên cùng một không gian trực quan.</p>
+  <section class="dash-panel map-panel compact">
+    <div class="panel-title"><div><div class="panel-kicker">Không gian dân cư</div><h3>Mở bản đồ dân cư</h3></div><span class="sync"><span class="sync-dot"></span> Sẵn sàng</span></div>
+    <p id="dashboardDataNote">Bản đồ vị trí nhà hiện có thể mở riêng; dashboard này dùng số liệu nhân khẩu từ Excel.</p>
     <div class="dash-cta"><span class="sync"><span class="sync-dot"></span> Bản đồ sẵn sàng</span><button class="btn2" onclick="setView('map')">Xem bản đồ →</button></div>
+  </section>
+  <section class="dash-panel chat-panel">
+    <div class="chat-header">
+      <div class="chat-brand">
+        <span class="chat-avatar" aria-hidden="true">✦</span>
+        <div>
+          <div class="eyebrow">Trợ lý dữ liệu</div>
+          <h3>Hỏi Dashboard bằng AI</h3>
+          <div class="chat-caption">Phân tích grounded trên dữ liệu của Lệ Sơn Nam</div>
+        </div>
+      </div>
+      <div class="chat-connection"><span class="chat-live-dot" aria-hidden="true"></span><span id="chatStatus">DeepSeek khi có API key</span></div>
+    </div>
+    <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+    <div class="chat-quick">
+      <button type="button" onclick="askChat('Tóm tắt tình hình dân số hiện tại')">📈 Tóm tắt dân số</button>
+      <button type="button" onclick="askChat('Tổ 5 có bao nhiêu hộ và nhân khẩu?')">🏘 Phân tích Tổ 5</button>
+      <button type="button" onclick="askChat('Dữ liệu còn thiếu hoặc cần rà soát gì?')">⚠ Chất lượng dữ liệu</button>
+    </div>
+    <form class="chat-form" id="chatForm">
+      <textarea id="chatInput" aria-label="Câu hỏi cho trợ lý dữ liệu" placeholder="Ví dụ: Tổ nào đông dân nhất?" rows="1"></textarea>
+      <button id="chatSend" type="submit">Gửi</button>
+    </form>
   </section>
 </div>
 </div>
 <div id="mapView" class="app-view">
 <div id="wrap">
-  <div id="map"></div>
-  <div id="filters">
-    <button class="red" onclick="tog('sup')">🆘 Cần hỗ trợ</button>
-    <button onclick="tog('pol')">🚩 Chính sách</button>
-    <button onclick="tog('vneid')">🟦 VNeID</button>
-    <button onclick="tog('bhyt')">🟩 BHYT</button>
-    <button class="red" onclick="tog('rep')">⚠️ Phản ánh</button>
-  </div>
-  <div class="legend">
-    <i style="background:#16a34a"></i> Nhà ổn định<br>
-    <i style="background:#f59e0b"></i> Hộ chính sách<br>
-    <i style="background:#dc2626"></i> Hộ cần hỗ trợ<br>
-    <i style="background:rgba(30,64,175,.25);border:2px solid #1e40af"></i> Vùng tổ<br>
-    <i style="background:#7c3aed;border-radius:50%"></i> Điểm phản ánh
+  <div id="map">
+    <div class="legend">
+      <i style="background:#16a34a"></i> Nhà ổn định<br>
+      <i style="background:#f59e0b"></i> Hộ chính sách<br>
+      <i style="background:#dc2626"></i> Hộ cần hỗ trợ<br>
+      <i style="background:rgba(30,64,175,.25);border:2px solid #1e40af"></i> Vùng tổ<br>
+      <i style="background:#7c3aed;border-radius:50%"></i> Điểm phản ánh
+    </div>
   </div>
   <div id="side">
     <div id="tabs">
@@ -244,12 +362,14 @@
 </div>
 </div>
 <footer>
-  <b>Lệ Sơn Nam Smart Village</b> – demo quản lý cho Trưởng thôn · dữ liệu hộ MÔ PHỎNG (Nghị định 13/2023) · vị trí nhà thật từ bản đồ vẽ tay
+  <b>Lệ Sơn Nam Smart Village</b> – nhân khẩu theo file Excel import · vị trí nhà và ghi chú theo bản đồ hiện có
 </footer>
+<div id="demoOverlay"><div class="demo-title"><span id="demoTitle">Tour Thôn Lệ Sơn Nam</span><span id="demoCount">1/1</span></div><div class="demo-sub" id="demoSub">Đang chuẩn bị trình diễn...</div><div class="demo-track"><i id="demoProgress"></i></div><div class="demo-controls"><button onclick="demoPrev()">← Trước</button><button onclick="demoNext()">Tiếp →</button><button onclick="demoStop()">Kết thúc</button></div></div>
 <div id="reportArea"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const DATA = {"houses": [{"id": "LSN-H045", "owner": "Dương Văn G", "members": 3, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.175511, 15.959079], [108.17544, 15.958878], [108.175517, 15.958852], [108.175587, 15.959048], [108.175511, 15.959079]], "c": [108.1755132, 15.958987200000001]}, {"id": "LSN-H038", "owner": "Ngô Văn K", "members": 4, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.175509, 15.960193], [108.175457, 15.959996], [108.1757, 15.959929], [108.17576, 15.960126], [108.175509, 15.960193]], "c": [108.175587, 15.9600874]}, {"id": "LSN-H042", "owner": "Võ Văn C", "members": 4, "elderly": 2, "children": 1, "policy": true, "support": false, "vneid": false, "bhyt": false, "geom": [[108.175596, 15.9596], [108.175664, 15.959586], [108.175606, 15.959376], [108.175539, 15.959401], [108.175596, 15.9596]], "c": [108.1756002, 15.9595126]}, {"id": "LSN-H044", "owner": "Phạm Thị Q", "members": 6, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.175643, 15.959049], [108.175582, 15.958831], [108.175653, 15.958816], [108.175714, 15.959021], [108.175643, 15.959049]], "c": [108.175647, 15.958953200000002]}, {"id": "LSN-H041", "owner": "Trần Thị B", "members": 7, "elderly": 1, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.175787, 15.959551], [108.175729, 15.959347], [108.175799, 15.959334], [108.175857, 15.959536], [108.175787, 15.959551]], "c": [108.1757918, 15.9594638]}, {"id": "LSN-H043", "owner": "Hồ Thị D", "members": 2, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.175831, 15.958986], [108.175764, 15.958754], [108.175847, 15.958762], [108.175901, 15.958968], [108.175831, 15.958986]], "c": [108.1758348, 15.9588912]}, {"id": "LSN-H039", "owner": "Bùi Thị H", "members": 7, "elderly": 2, "children": 2, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.175942, 15.960072], [108.175885, 15.959857], [108.175957, 15.959851], [108.176012, 15.960055], [108.175942, 15.960072]], "c": [108.1759476, 15.959981399999998]}, {"id": "LSN-H040", "owner": "Phan Văn P", "members": 4, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.175959, 15.960316], [108.175886, 15.960096], [108.175961, 15.960095], [108.176022, 15.960287], [108.175963, 15.960303], [108.175959, 15.960316]], "c": [108.17595833333336, 15.960235500000001]}, {"id": "LSN-H046", "owner": "Lý Văn A", "members": 7, "elderly": 0, "children": 3, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.175977, 15.95855], [108.17596, 15.958485], [108.176176, 15.958425], [108.176192, 15.958492], [108.175977, 15.95855]], "c": [108.17605640000002, 15.9585004]}, {"id": "LSN-H052", "owner": "Bùi Văn E", "members": 2, "elderly": 2, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.176356, 15.959101], [108.176282, 15.958875], [108.176361, 15.95886], [108.176432, 15.959086], [108.176356, 15.959101]], "c": [108.1763574, 15.9590046]}, {"id": "LSN-H047", "owner": "Nguyễn Văn M", "members": 4, "elderly": 0, "children": 1, "policy": false, "support": false, "vneid": false, "bhyt": false, "geom": [[108.176495, 15.958351], [108.176465, 15.958274], [108.176699, 15.958229], [108.176715, 15.958296], [108.176495, 15.958351]], "c": [108.1765738, 15.958300200000002]}, {"id": "LSN-H063", "owner": "Phan Thị F", "members": 4, "elderly": 0, "children": 2, "policy": false, "support": true, "vneid": true, "bhyt": true, "geom": [[108.1766, 15.960452], [108.176538, 15.960228], [108.176585, 15.960219], [108.176651, 15.960437], [108.1766, 15.960452]], "c": [108.1765948, 15.9603576]}, {"id": "LSN-H032", "owner": "Hồ Thị Q", "members": 2, "elderly": 2, "children": 0, "policy": false, "support": true, "vneid": false, "bhyt": true, "geom": [[108.176667, 15.95931], [108.176613, 15.959114], [108.176685, 15.9591], [108.176726, 15.959298], [108.176667, 15.95931]], "c": [108.17667159999999, 15.9592264]}, {"id": "LSN-H029", "owner": "Hoàng Văn G", "members": 5, "elderly": 1, "children": 3, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.176738, 15.959483], [108.176693, 15.95932], [108.176743, 15.95931], [108.176787, 15.959467], [108.176738, 15.959483]], "c": [108.1767398, 15.959412600000002]}, {"id": "LSN-H051", "owner": "Phan Văn G", "members": 6, "elderly": 2, "children": 1, "policy": true, "support": false, "vneid": true, "bhyt": true, "geom": [[108.176739, 15.958752], [108.176675, 15.958541], [108.176748, 15.958527], [108.176806, 15.958737], [108.176739, 15.958752]], "c": [108.1767414, 15.958661800000002]}, {"id": "LSN-H033", "owner": "Võ Văn M", "members": 6, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.176743, 15.959296], [108.176798, 15.959284], [108.176742, 15.959095], [108.176703, 15.959137], [108.176743, 15.959296]], "c": [108.1767458, 15.959221599999998]}, {"id": "LSN-H030", "owner": "Hoàng Thị D", "members": 5, "elderly": 0, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.176802, 15.959466], [108.176747, 15.959305], [108.176809, 15.959287], [108.17685, 15.959461], [108.176802, 15.959466]], "c": [108.176802, 15.959397]}, {"id": "LSN-H037", "owner": "Hồ Thị Q", "members": 7, "elderly": 2, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.176805, 15.959283], [108.176748, 15.959089], [108.176806, 15.95907], [108.176868, 15.959269], [108.176805, 15.959283]], "c": [108.17680639999999, 15.959198800000001]}, {"id": "LSN-H050", "owner": "Đỗ Thị D", "members": 6, "elderly": 0, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": false, "geom": [[108.176809, 15.958733], [108.176752, 15.958523], [108.176803, 15.95851], [108.176869, 15.958712], [108.176809, 15.958733]], "c": [108.1768084, 15.9586422]}, {"id": "LSN-H062", "owner": "Dương Văn P", "members": 3, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.176861, 15.960374], [108.176806, 15.960191], [108.176858, 15.960172], [108.176911, 15.960361], [108.176861, 15.960374]], "c": [108.17685940000001, 15.960294399999999]}, {"id": "LSN-H031", "owner": "Bùi Thị Q", "members": 2, "elderly": 0, "children": 2, "policy": false, "support": true, "vneid": true, "bhyt": true, "geom": [[108.176866, 15.95945], [108.176912, 15.95944], [108.176868, 15.959272], [108.17682, 15.959289], [108.176866, 15.95945]], "c": [108.1768664, 15.959380200000002]}, {"id": "LSN-H034", "owner": "Hoàng Văn G", "members": 7, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": false, "geom": [[108.176869, 15.959265], [108.17682, 15.95906], [108.176879, 15.959047], [108.176931, 15.959247], [108.176869, 15.959265]], "c": [108.1768736, 15.9591768]}, {"id": "LSN-H036", "owner": "Phan Văn E", "members": 4, "elderly": 0, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.176923, 15.959427], [108.17688, 15.959278], [108.17695, 15.959252], [108.176997, 15.959416], [108.176923, 15.959427]], "c": [108.17693460000001, 15.959359999999998]}, {"id": "LSN-H035", "owner": "Đỗ Thị L", "members": 2, "elderly": 0, "children": 2, "policy": false, "support": true, "vneid": true, "bhyt": true, "geom": [[108.176986, 15.959235], [108.176928, 15.959033], [108.176995, 15.959012], [108.177061, 15.959217], [108.176986, 15.959235]], "c": [108.1769912, 15.9591464]}, {"id": "LSN-H056", "owner": "Lý Văn P", "members": 6, "elderly": 1, "children": 0, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.176943, 15.957077], [108.1769, 15.956991], [108.177078, 15.956936], [108.177121, 15.957026], [108.176943, 15.957077]], "c": [108.17699699999999, 15.957021399999999]}, {"id": "LSN-H057", "owner": "Đỗ Thị Q", "members": 2, "elderly": 0, "children": 2, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.177018, 15.957236], [108.176995, 15.957186], [108.17714, 15.957124], [108.177178, 15.957175], [108.177018, 15.957236]], "c": [108.1770698, 15.9571914]}, {"id": "LSN-H058", "owner": "Đặng Văn G", "members": 7, "elderly": 2, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177062, 15.957441], [108.177034, 15.95738], [108.17727, 15.957307], [108.177297, 15.957372], [108.177062, 15.957441]], "c": [108.17714500000002, 15.9573882]}, {"id": "LSN-H061", "owner": "Lý Văn K", "members": 5, "elderly": 2, "children": 3, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.177167, 15.960296], [108.177107, 15.9601], [108.177182, 15.960076], [108.177234, 15.960286], [108.177167, 15.960296]], "c": [108.17717139999999, 15.960210799999999]}, {"id": "LSN-H028", "owner": "Đặng Thị D", "members": 3, "elderly": 1, "children": 2, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177325, 15.958473], [108.177324, 15.958378], [108.177516, 15.958349], [108.177538, 15.958437], [108.177325, 15.958473]], "c": [108.1774056, 15.958421999999999]}, {"id": "LSN-H059", "owner": "Lê Văn P", "members": 2, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177343, 15.957251], [108.177322, 15.957198], [108.177537, 15.957132], [108.177541, 15.957186], [108.177343, 15.957251]], "c": [108.1774172, 15.9572036]}, {"id": "LSN-H027", "owner": "Hồ Văn K", "members": 6, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.177332, 15.958539], [108.177552, 15.95849], [108.177544, 15.958438], [108.177329, 15.95847], [108.177332, 15.958539]], "c": [108.17741780000001, 15.958495199999998]}, {"id": "LSN-H060", "owner": "Dương Thị H", "members": 2, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": false, "geom": [[108.177438, 15.95751], [108.177427, 15.957461], [108.177597, 15.957423], [108.177607, 15.957483], [108.177438, 15.95751]], "c": [108.17750139999998, 15.957477399999998]}, {"id": "LSN-H025", "owner": "Nguyễn Văn G", "members": 2, "elderly": 2, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177454, 15.95932], [108.177446, 15.959283], [108.177647, 15.959234], [108.177667, 15.959274], [108.177454, 15.95932]], "c": [108.17753359999999, 15.9592862]}, {"id": "LSN-H023", "owner": "Bùi Văn C", "members": 7, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177491, 15.959564], [108.177736, 15.959508], [108.177711, 15.959377], [108.177398, 15.959438], [108.177415, 15.959537], [108.177491, 15.959564]], "c": [108.17754033333334, 15.959498000000002]}, {"id": "LSN-H026", "owner": "Võ Văn C", "members": 6, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.177438, 15.959225], [108.177613, 15.959195], [108.177604, 15.959154], [108.177675, 15.959141], [108.177662, 15.959051], [108.177428, 15.95908], [108.177438, 15.959225]], "c": [108.17755114285713, 15.959153]}, {"id": "LSN-H049", "owner": "Nguyễn Thị B", "members": 3, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.177505, 15.957763], [108.177486, 15.957725], [108.177748, 15.957639], [108.177768, 15.957707], [108.177505, 15.957763]], "c": [108.1776024, 15.957719399999998]}, {"id": "LSN-H053", "owner": "Hồ Thị N", "members": 3, "elderly": 1, "children": 2, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177569, 15.959732], [108.177549, 15.959666], [108.177766, 15.959627], [108.177781, 15.95969], [108.177569, 15.959732]], "c": [108.1776468, 15.959689399999998]}, {"id": "LSN-H054", "owner": "Phạm Văn G", "members": 2, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177585, 15.959804], [108.177561, 15.959729], [108.177789, 15.959692], [108.177795, 15.959762], [108.177585, 15.959804]], "c": [108.17766300000001, 15.959758200000001]}, {"id": "LSN-H055", "owner": "Dương Văn P", "members": 7, "elderly": 0, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177587, 15.959864], [108.17758, 15.959797], [108.177797, 15.959762], [108.177811, 15.959833], [108.177587, 15.959864]], "c": [108.1776724, 15.959823999999998]}, {"id": "LSN-H048", "owner": "Hồ Thị Q", "members": 4, "elderly": 1, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": false, "geom": [[108.177597, 15.958076], [108.177564, 15.95799], [108.177803, 15.957921], [108.177821, 15.958023], [108.177597, 15.958076]], "c": [108.1776764, 15.9580172]}, {"id": "LSN-H022", "owner": "Phạm Thị B", "members": 2, "elderly": 2, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.1776, 15.96014], [108.177847, 15.960105], [108.177828, 15.960042], [108.177589, 15.960081], [108.1776, 15.96014]], "c": [108.1776928, 15.960101600000002]}, {"id": "LSN-H021", "owner": "Phạm Thị B", "members": 5, "elderly": 0, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.17767, 15.960198], [108.177654, 15.960127], [108.177828, 15.960109], [108.177836, 15.960166], [108.17767, 15.960198]], "c": [108.17773159999999, 15.9601596]}, {"id": "LSN-H066", "owner": "Đặng Thị D", "members": 5, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.17765, 15.958605], [108.177635, 15.958523], [108.177904, 15.958487], [108.17793, 15.958552], [108.17765, 15.958605]], "c": [108.1777538, 15.9585544]}, {"id": "LSN-H020", "owner": "Ngô Văn E", "members": 3, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177709, 15.960277], [108.17789, 15.960247], [108.17787, 15.960165], [108.177682, 15.960197], [108.177709, 15.960277]], "c": [108.177772, 15.960232600000001]}, {"id": "LSN-H019", "owner": "Hồ Thị H", "members": 6, "elderly": 0, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177969, 15.960839], [108.178006, 15.960828], [108.177955, 15.960657], [108.177914, 15.960665], [108.177969, 15.960839]], "c": [108.1779626, 15.960765599999998]}, {"id": "LSN-H024", "owner": "Trần Thị B", "members": 5, "elderly": 1, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.177927, 15.959854], [108.177914, 15.959801], [108.178127, 15.959764], [108.178136, 15.959836], [108.177927, 15.959854]], "c": [108.1780062, 15.959821799999997]}, {"id": "LSN-H064", "owner": "Trần Văn G", "members": 3, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.178425, 15.959425], [108.178422, 15.959374], [108.178579, 15.959372], [108.178588, 15.959416], [108.178425, 15.959425]], "c": [108.1784878, 15.959402399999998]}, {"id": "LSN-H065", "owner": "Lý Văn P", "members": 5, "elderly": 1, "children": 0, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.178381, 15.959989], [108.178379, 15.959926], [108.178666, 15.959888], [108.17867, 15.959942], [108.178381, 15.959989]], "c": [108.17849540000002, 15.9599468]}, {"id": "LSN-H011", "owner": "Lê Văn E", "members": 5, "elderly": 1, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.178645, 15.959146], [108.178445, 15.959038], [108.178472, 15.958997], [108.178668, 15.959102], [108.178645, 15.959146]], "c": [108.178575, 15.9590858]}, {"id": "LSN-H014", "owner": "Hồ Thị N", "members": 6, "elderly": 1, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.178641, 15.958976], [108.178507, 15.958882], [108.178567, 15.958815], [108.17863, 15.958864], [108.17867, 15.958846], [108.178728, 15.958897], [108.178641, 15.958976]], "c": [108.17862628571427, 15.958893714285713]}, {"id": "LSN-H015", "owner": "Võ Văn C", "members": 4, "elderly": 0, "children": 2, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.178737, 15.958839], [108.178595, 15.958694], [108.178669, 15.95863], [108.178822, 15.958771], [108.178737, 15.958839]], "c": [108.17871199999999, 15.9587546]}, {"id": "LSN-H010", "owner": "Trần Thị D", "members": 4, "elderly": 1, "children": 2, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.178643, 15.959516], [108.178668, 15.959467], [108.178902, 15.959533], [108.178871, 15.959578], [108.178658, 15.959525], [108.178643, 15.959516]], "c": [108.17873083333332, 15.9595225]}, {"id": "LSN-H009", "owner": "Hồ Thị F", "members": 7, "elderly": 2, "children": 1, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.178656, 15.959466], [108.178599, 15.959368], [108.178638, 15.959258], [108.179107, 15.959386], [108.179044, 15.959564], [108.178656, 15.959466]], "c": [108.17878333333334, 15.959418000000001]}, {"id": "LSN-H006", "owner": "Đỗ Thị D", "members": 6, "elderly": 1, "children": 2, "policy": false, "support": true, "vneid": true, "bhyt": true, "geom": [[108.178745, 15.959133], [108.178916, 15.959187], [108.178934, 15.959153], [108.178768, 15.959083], [108.178745, 15.959133]], "c": [108.17882160000002, 15.959137799999999]}, {"id": "LSN-H012", "owner": "Phan Thị D", "members": 5, "elderly": 2, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.17885, 15.959087], [108.178803, 15.958998], [108.178901, 15.958944], [108.178969, 15.959018], [108.17885, 15.959087]], "c": [108.1788746, 15.9590268]}, {"id": "LSN-H016", "owner": "Lý Văn M", "members": 6, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.17893, 15.958677], [108.178822, 15.95858], [108.178871, 15.958525], [108.178976, 15.958636], [108.17893, 15.958677]], "c": [108.17890580000001, 15.958618999999999]}, {"id": "LSN-H013", "owner": "Dương Văn M", "members": 2, "elderly": 0, "children": 1, "policy": false, "support": true, "vneid": true, "bhyt": false, "geom": [[108.178855, 15.958891], [108.179019, 15.95894], [108.179032, 15.958896], [108.178881, 15.958837], [108.178862, 15.958878], [108.178855, 15.958891]], "c": [108.17891733333333, 15.958888833333333]}, {"id": "LSN-H002", "owner": "Nguyễn Văn A", "members": 6, "elderly": 0, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.178981, 15.95916], [108.179031, 15.959184], [108.178979, 15.959341], [108.178917, 15.959325], [108.178981, 15.95916]], "c": [108.17897779999998, 15.959234]}, {"id": "LSN-H001", "owner": "Ngô Văn E", "members": 7, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.17898, 15.959343], [108.179036, 15.959182], [108.179121, 15.959205], [108.179073, 15.959367], [108.17898, 15.959343]], "c": [108.17903799999999, 15.959288]}, {"id": "LSN-H005", "owner": "Dương Văn A", "members": 4, "elderly": 1, "children": 2, "policy": false, "support": false, "vneid": false, "bhyt": true, "geom": [[108.179014, 15.959089], [108.179075, 15.959105], [108.179132, 15.958917], [108.179074, 15.958917], [108.179014, 15.959089]], "c": [108.1790618, 15.959023400000001]}, {"id": "LSN-H017", "owner": "Đỗ Thị F", "members": 3, "elderly": 2, "children": 0, "policy": false, "support": true, "vneid": true, "bhyt": false, "geom": [[108.178975, 15.958801], [108.179205, 15.958866], [108.179272, 15.95873], [108.179036, 15.958657], [108.178975, 15.958801]], "c": [108.17909260000002, 15.958770999999999]}, {"id": "LSN-H004", "owner": "Hoàng Văn C", "members": 7, "elderly": 1, "children": 2, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.179078, 15.959098], [108.179134, 15.958924], [108.179187, 15.958933], [108.179132, 15.959118], [108.179078, 15.959098]], "c": [108.17912179999999, 15.9590342]}, {"id": "LSN-H018", "owner": "Phạm Thị L", "members": 4, "elderly": 0, "children": 0, "policy": false, "support": true, "vneid": true, "bhyt": true, "geom": [[108.179183, 15.958541], [108.179161, 15.958576], [108.17912, 15.958561], [108.179039, 15.958657], [108.17929, 15.958737], [108.179322, 15.958637], [108.179294, 15.958572], [108.179183, 15.958541]], "c": [108.179199, 15.958602749999999]}, {"id": "LSN-H003", "owner": "Phạm Thị H", "members": 7, "elderly": 2, "children": 3, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.179175, 15.959098], [108.179168, 15.959006], [108.179283, 15.958969], [108.17933, 15.959049], [108.179175, 15.959098]], "c": [108.17922619999999, 15.959044]}, {"id": "LSN-H007", "owner": "Võ Văn E", "members": 2, "elderly": 0, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.17926, 15.959247], [108.179313, 15.95926], [108.179247, 15.959456], [108.179193, 15.959441], [108.17926, 15.959247]], "c": [108.17925460000001, 15.9593302]}, {"id": "LSN-H008", "owner": "Đỗ Văn M", "members": 7, "elderly": 1, "children": 0, "policy": false, "support": false, "vneid": true, "bhyt": true, "geom": [[108.179326, 15.959477], [108.179368, 15.959327], [108.179388, 15.959267], [108.179452, 15.959292], [108.179384, 15.959488], [108.179326, 15.959477]], "c": [108.17937400000001, 15.959387999999999]}], "tos": [{"id": 1, "name": "Tổ 1", "house_ids": ["LSN-H045", "LSN-H038", "LSN-H042", "LSN-H044", "LSN-H041", "LSN-H043", "LSN-H039", "LSN-H040", "LSN-H046", "LSN-H052", "LSN-H047", "LSN-H063", "LSN-H032", "LSN-H029", "LSN-H051", "LSN-H033"]}, {"id": 2, "name": "Tổ 2", "house_ids": ["LSN-H030", "LSN-H037", "LSN-H050", "LSN-H062", "LSN-H031", "LSN-H034", "LSN-H036", "LSN-H035", "LSN-H056", "LSN-H057", "LSN-H058", "LSN-H061", "LSN-H028", "LSN-H059", "LSN-H027", "LSN-H060", "LSN-H025"]}, {"id": 3, "name": "Tổ 3", "house_ids": ["LSN-H023", "LSN-H026", "LSN-H049", "LSN-H053", "LSN-H054", "LSN-H055", "LSN-H048", "LSN-H022", "LSN-H021", "LSN-H066", "LSN-H020", "LSN-H019", "LSN-H024", "LSN-H064", "LSN-H065", "LSN-H011"]}, {"id": 4, "name": "Tổ 4", "house_ids": ["LSN-H014", "LSN-H015", "LSN-H010", "LSN-H009", "LSN-H006", "LSN-H012", "LSN-H016", "LSN-H013", "LSN-H002", "LSN-H001", "LSN-H005", "LSN-H017", "LSN-H004", "LSN-H018", "LSN-H003", "LSN-H007", "LSN-H008"]}], "to_of": {"LSN-H045": 1, "LSN-H038": 1, "LSN-H042": 1, "LSN-H044": 1, "LSN-H041": 1, "LSN-H043": 1, "LSN-H039": 1, "LSN-H040": 1, "LSN-H046": 1, "LSN-H052": 1, "LSN-H047": 1, "LSN-H063": 1, "LSN-H032": 1, "LSN-H029": 1, "LSN-H051": 1, "LSN-H033": 1, "LSN-H030": 2, "LSN-H037": 2, "LSN-H050": 2, "LSN-H062": 2, "LSN-H031": 2, "LSN-H034": 2, "LSN-H036": 2, "LSN-H035": 2, "LSN-H056": 2, "LSN-H057": 2, "LSN-H058": 2, "LSN-H061": 2, "LSN-H028": 2, "LSN-H059": 2, "LSN-H027": 2, "LSN-H060": 2, "LSN-H025": 2, "LSN-H023": 3, "LSN-H026": 3, "LSN-H049": 3, "LSN-H053": 3, "LSN-H054": 3, "LSN-H055": 3, "LSN-H048": 3, "LSN-H022": 3, "LSN-H021": 3, "LSN-H066": 3, "LSN-H020": 3, "LSN-H019": 3, "LSN-H024": 3, "LSN-H064": 3, "LSN-H065": 3, "LSN-H011": 3, "LSN-H014": 4, "LSN-H015": 4, "LSN-H010": 4, "LSN-H009": 4, "LSN-H006": 4, "LSN-H012": 4, "LSN-H016": 4, "LSN-H013": 4, "LSN-H002": 4, "LSN-H001": 4, "LSN-H005": 4, "LSN-H017": 4, "LSN-H004": 4, "LSN-H018": 4, "LSN-H003": 4, "LSN-H007": 4, "LSN-H008": 4}, "reports": [{"id": "PR-001", "type": "Đèn đường hỏng", "color": "#f59e0b", "desc": "Phản ánh: Đèn đường hỏng – khu vực LSN-H010", "pos": [15.959657008826577, 108.17893513673116], "status": "Mới"}, {"id": "PR-002", "type": "Đường xuống cấp", "color": "#dc2626", "desc": "Phản ánh: Đường xuống cấp – khu vực LSN-H044", "pos": [15.959197357317553, 108.17570213566538], "status": "Đã xử lý"}, {"id": "PR-003", "type": "Rác thải tồn đọng", "color": "#16a34a", "desc": "Phản ánh: Rác thải tồn đọng – khu vực LSN-H044", "pos": [15.958703568477299, 108.17560416766179], "status": "Đang xử lý"}, {"id": "PR-004", "type": "Ngập nước", "color": "#2563eb", "desc": "Phản ánh: Ngập nước – khu vực LSN-H035", "pos": [15.958876570780093, 108.17691866231851], "status": "Mới"}, {"id": "PR-005", "type": "An ninh", "color": "#7c3aed", "desc": "Phản ánh: An ninh – khu vực LSN-H001", "pos": [15.95918410748293, 108.17919473782473], "status": "Đang xử lý"}, {"id": "PR-006", "type": "Đèn đường hỏng", "color": "#f59e0b", "desc": "Phản ánh: Đèn đường hỏng – khu vực LSN-H049", "pos": [15.957870605894131, 108.17780155457109], "status": "Đang xử lý"}, {"id": "PR-007", "type": "Đường xuống cấp", "color": "#dc2626", "desc": "Phản ánh: Đường xuống cấp – khu vực LSN-H047", "pos": [15.95828238410173, 108.17672321455665], "status": "Mới"}, {"id": "PR-008", "type": "Rác thải tồn đọng", "color": "#16a34a", "desc": "Phản ánh: Rác thải tồn đọng – khu vực LSN-H019", "pos": [15.96060013329943, 108.17770377102227], "status": "Đã xử lý"}, {"id": "PR-009", "type": "Ngập nước", "color": "#2563eb", "desc": "Phản ánh: Ngập nước – khu vực LSN-H043", "pos": [15.959043739922436, 108.17610456703963], "status": "Mới"}, {"id": "PR-010", "type": "An ninh", "color": "#7c3aed", "desc": "Phản ánh: An ninh – khu vực LSN-H042", "pos": [15.959585401393952, 108.17544332696514], "status": "Đang xử lý"}], "meta": {"name": "Thôn Lệ Sơn Nam", "x": "Hòa Tiến, Hòa Vang, Đà Nẵng", "source": "backups/le-son-nam-2026-08-08-66nha.geojson", "n": 66}};
+let dashboardData = null;
 const IMPORTED_HOUSEHOLDS = {
   "LSN-H067": {
     householdNumber: "7",
@@ -285,14 +405,85 @@ let houses = DATA.houses.map(h => hydrateImportedHousehold(Object.assign({}, h))
 const tos = DATA.tos.map(t => Object.assign({}, t, {house_ids: t.house_ids.slice()}));
 let reports = DATA.reports.map(r => Object.assign({}, r));
 let toMap = Object.assign({}, DATA.to_of);
-const LSKEY = 'lsv_demo_v2';
+
+// Nạp danh sách hộ thật từ file nguồn; các trường không có trong nguồn được để trống.
+// Nguồn hộ chuẩn của trang này là bản xuất mới nhất từ màn hình Import.
+// Khối import cũ được giữ làm tài liệu nhưng không được dùng để ghép tuần tự ID nhà.
+fetch('data/disabled-households-source.json').then(r => r.json()).then(bundle => {
+  const rows = bundle.households || [];
+  const today = new Date();
+  const age = value => {
+    const m = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return null;
+    const birth = new Date(+m[3], +m[2] - 1, +m[1]);
+    return today.getFullYear() - birth.getFullYear() - ((today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) ? 1 : 0);
+  };
+  rows.slice(0, houses.length).forEach((row, i) => {
+    const h = houses[i];
+    const members = (row.members || []).map(m => ({name:m.name, dob:m.dob, gender:m.gender, head:!!m.head}));
+    const ages = members.map(m => age(m.dob));
+    Object.assign(h, {owner: row.headName || 'Chưa nhập dữ liệu', address: row.address || '', memberDetails: members,
+      members: members.length, elderly: ages.filter(a => a !== null && a >= 60).length, children: ages.filter(a => a !== null && a < 18).length,
+      policy: null, support: null, vneid: null, bhyt: null});
+  });
+  houses.slice(rows.length).forEach(h => Object.assign(h, {owner: 'Chưa nhập dữ liệu', members: 0, elderly: 0, children: 0, memberDetails: [], policy: null, support: null, vneid: null, bhyt: null}));
+  reports = [];
+  tos.splice(0, tos.length, {id: 3, name: 'Tổ 3', house_ids: houses.slice(0, rows.length).map(h => h.id)});
+  toMap = {}; tos[0].house_ids.forEach(id => { toMap[id] = 3; });
+  store(); renderAll();
+}).catch(() => {});
+
+// Ranh giới tổ/thôn vẽ tay mới nhất, lấy từ bản sao đã lưu trên máy.
+function pointInBoundary(point, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    const hit = ((yi > point[1]) !== (yj > point[1])) && (point[0] < (xj - xi) * (point[1] - yi) / ((yj - yi) || 1e-12) + xi);
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+fetch('backups/latest-drawn.json').then(r => r.json()).then(fc => {
+  const allFeatures = fc.features || [];
+  const houseFeatures = allFeatures.filter(f => f.geometry && f.geometry.type === 'Polygon' && (!f.properties || !['to', 'thon'].includes(f.properties.type)));
+  houses = houseFeatures.map((f, i) => {
+    const p = f.properties || {}, ring = f.geometry.coordinates[0] || [];
+    const c = ring.reduce((a, q) => [a[0] + q[0] / Math.max(1, ring.length), a[1] + q[1] / Math.max(1, ring.length)], [0, 0]);
+    const details = Array.isArray(p.members_list) ? p.members_list.map(m => Object.assign({}, m)) : [];
+    return {id: p.fid || ('LSN-H' + String(i + 1).padStart(3, '0')), owner: p.name || 'Chưa nhập dữ liệu', address: p.note || '', note: p.note || '', memberDetails: details,
+      members: Number(p.members) || details.length || 0, elderly: Number(p.elderly) || 0, children: Number(p.children) || 0,
+      policy: null, support: null, vneid: null, bhyt: null, geom: ring, c};
+  });
+  const boundaryFeatures = allFeatures.filter(f => f.properties && (f.properties.type === 'to' || f.properties.type === 'thon'));
+  const thon = boundaryFeatures.find(f => f.properties.type === 'thon');
+  villageBoundary = thon ? thon.geometry.coordinates[0] : null;
+  const actualTos = boundaryFeatures.filter(f => f.properties.type === 'to').map((f, i) => {
+    const ring = f.geometry.coordinates[0];
+    const idMatch = String(f.properties.name || '').match(/(\d+)/);
+    const id = idMatch ? Number(idMatch[1]) : i + 1;
+    return {id, name: f.properties.name || ('Tổ ' + id), ring, house_ids: houses.filter(h => pointInBoundary(h.c, ring)).map(h => h.id)};
+  }).sort((a, b) => a.id - b.id);
+  if (actualTos.length) {
+    tos.splice(0, tos.length, ...actualTos);
+    toMap = {};
+    tos.forEach(t => t.house_ids.forEach(id => { toMap[id] = t.id; }));
+    houses.forEach(h => {
+      const t = tos.find(x => x.house_ids.includes(h.id));
+      if (!t) return;
+      h.address = t.name + ', Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng';
+      if (Array.isArray(h.memberDetails)) h.memberDetails.forEach(m => { m.address = h.address; });
+    });
+    renderAll();
+  }
+}).catch(() => {});
+const LSKEY = 'lsv_real_v3';
 function store() {
   try {
     localStorage.setItem(LSKEY, JSON.stringify({houses, reports, toMap, tos: tos.map(t => ({id: t.id, house_ids: t.house_ids.slice()}))}));
   } catch (e) {}
 }
 try {
-  const raw = localStorage.getItem(LSKEY) || localStorage.getItem('lsv_demo_v1');
+  const raw = localStorage.getItem(LSKEY);
   const s = raw ? JSON.parse(raw) : null;
   if (s && Array.isArray(s.houses)) houses = s.houses.map(h => hydrateImportedHousehold(h));
   if (s && Array.isArray(s.reports)) reports = s.reports;
@@ -306,26 +497,34 @@ function toOf(h) { return toMap[h.id] || DATA.to_of[h.id] || 1; }
 function byId(id) { return houses.find(h => h.id === id); }
 
 // ============ MAP ============
-const map = L.map('map', {preferCanvas: true}).setView([15.9606, 108.1855], 16);
-const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: 'Tiles &copy; Google (tham chiếu)'});
+const map = L.map('map', {preferCanvas: true, maxZoom: 20}).setView([15.9606, 108.1855], 16);
+const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {maxZoom: 20, maxNativeZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: 'Tiles &copy; Google (tham chiếu)'});
 googleHybrid.addTo(map);
 const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19});
 L.control.layers({'Google Hybrid': googleHybrid, 'OSM': osm}).addTo(map);
 
-function hColor(h) { return h.support ? '#dc2626' : (h.policy ? '#f59e0b' : '#16a34a'); }
+function hColor(h) { return h.support === true ? '#dc2626' : (h.policy === true ? '#f59e0b' : (h.members ? '#16a34a' : '#94a3b8')); }
 const houseLayer = L.featureGroup().addTo(map);
 const repLayer = L.featureGroup().addTo(map);
 const toLayer = L.featureGroup().addTo(map);
+const boundaryLayer = L.featureGroup().addTo(map);
+let villageBoundary = null;
 let addHouseMode = false, addRepMode = false;
 let hasFittedMap = false;
+let demoFocusedTo = null, demoFocusedHouse = null, demoMapMode = false, selectedHouseId = null, pendingHouseFocus = null;
 
 function renderHouses() {
   houseLayer.clearLayers();
   houses.forEach(h => {
-    const poly = L.polygon(h.geom.map(p => [p[1], p[0]]), {color: hColor(h), weight: 2, fillColor: hColor(h), fillOpacity: .55});
+    const focused = !demoFocusedHouse || demoFocusedHouse === h.id;
+    const selected = !selectedHouseId || selectedHouseId === h.id;
+    const stroke = selectedHouseId === h.id ? '#f97316' : hColor(h);
+    const poly = L.polygon(h.geom.map(p => [p[1], p[0]]), {color: stroke, weight: selectedHouseId === h.id ? 5 : (focused && selected ? 2.8 : 1), fillColor: stroke, fillOpacity: selectedHouseId === h.id ? .9 : (focused && selected ? .62 : .06), opacity: selectedHouseId === h.id ? 1 : (focused && selected ? 1 : .22)});
     poly.h = h;
-    poly.on('click', () => { openTab('chi'); showHouse(h); });
+    poly.on('click', () => { focusHouse(h); openTab('chi'); showHouse(h); });
     poly.bindTooltip(h.id + ' · ' + h.owner, {sticky: true});
+    const photoSrc = DEMO_HOUSE_PHOTOS[h.id];
+    poly.bindPopup('<div style="min-width:190px"><b>🏠 ' + esc(h.id) + '</b><br><span>' + esc(h.owner || 'Chưa nhập dữ liệu') + ' · ' + h.members + ' người</span>' + (photoSrc ? '<img src="' + photoSrc + '" alt="Ảnh nhà ' + esc(h.id) + '" style="display:block;width:100%;height:108px;object-fit:cover;border-radius:8px;margin-top:7px">' : '') + '</div>', {maxWidth:240, className:'house-photo-popup'});
     houseLayer.addLayer(poly);
   });
   applyFilter();
@@ -349,24 +548,65 @@ function hull(pts) {
   return lo.slice(0, -1).concat(up.slice(0, -1));
 }
 const TO_COLORS = ['#1e40af', '#b45309', '#065f46', '#7c3aed', '#be185d', '#0369a1'];
+const DEMO_HOUSE_PHOTOS = {
+  'LSN-H004': 'assets/demo-houses/house-1.jpg',
+  'LSN-H002': 'assets/demo-houses/house-2.jpg',
+  'LSN-H001': 'assets/demo-houses/house-3.jpg',
+  'LSN-H003': 'assets/demo-houses/house-4.jpg'
+};
+function housePhoto(h) {
+  const src = DEMO_HOUSE_PHOTOS[h && h.id];
+  return src ? '<figure class="house-photo"><img src="' + src + '" alt="Ảnh thực tế nhà ' + esc(h.id) + '" loading="eager"><figcaption>Ảnh thực tế · ' + esc(h.id) + '</figcaption></figure>' : '';
+}
 function renderTos() {
   toLayer.clearLayers();
+  boundaryLayer.clearLayers();
+  if (villageBoundary) {
+    L.polygon(villageBoundary.map(p => [p[1], p[0]]), {color: '#0f766e', weight: 3, dashArray: '9 6', fillColor: '#14b8a6', fillOpacity: .04}).bindTooltip('Ranh giới thôn (vẽ tay)', {sticky: true}).addTo(boundaryLayer);
+  }
   tos.forEach((t, i) => {
     const ids = new Set(t.house_ids);
     const pts = houses.filter(h => ids.has(h.id)).map(h => [h.c[0], h.c[1]]);
-    if (!pts.length) return;
+    if (!pts.length && !t.ring) return;
     let ring;
-    if (pts.length >= 3) ring = hull(pts);
+    if (t.ring && t.ring.length >= 3) ring = t.ring;
+    else if (pts.length >= 3) ring = hull(pts);
     else { const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]); ring = [[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)], [Math.min(...xs), Math.max(...ys)]]; }
     const color = TO_COLORS[i % TO_COLORS.length];
-    const poly = L.polygon(ring.map(p => [p[1], p[0]]), {color: color, weight: 2.5, fillColor: color, fillOpacity: .12});
+    const focused = !demoFocusedTo || demoFocusedTo === t.id;
+    const poly = L.polygon(ring.map(p => [p[1], p[0]]), {color: color, weight: focused ? 4 : 1.4, fillColor: color, fillOpacity: focused ? .22 : .035, opacity: focused ? 1 : .3});
     poly.t = t;
     poly.on('click', () => { openTab('chi'); showTo(t); });
     poly.bindTooltip(t.name, {sticky: true});
     toLayer.addLayer(poly);
     const c = poly.getBounds().getCenter();
-    L.marker(c, {icon: L.divIcon({className: '', html: '<div style="background:' + color + ';color:#fff;border-radius:8px;padding:2px 8px;font:700 11.5px system-ui;box-shadow:0 2px 6px rgba(0,0,0,.35)">' + t.name + '</div>', iconSize: [0, 0]})}).addTo(toLayer);
+    L.marker(c, {interactive: false, zIndexOffset: 1200, icon: L.divIcon({className: '', html: '<div class="to-map-label" style="background:' + color + '">' + t.name + '</div>', iconSize: [0, 0], iconAnchor: [0, 0]})}).addTo(toLayer);
   });
+}
+function setDemoFocus(toId, houseId) {
+  demoFocusedTo = toId || null;
+  demoFocusedHouse = houseId || null;
+  renderHouses(); renderTos();
+}
+function focusHouse(h) {
+  if (!h) return;
+  selectedHouseId = h.id;
+  renderHouses();
+  const fly = () => {
+    map.invalidateSize({pan: false});
+    map.flyTo([h.c[1], h.c[0]], 20, {duration: 2.1, easeLinearity: .06});
+    if (pendingHouseFocus === h.id) pendingHouseFocus = null;
+  };
+  if (pendingHouseFocus === h.id || !document.getElementById('mapView').classList.contains('is-active')) setTimeout(fly, 120);
+  else fly();
+}
+function openHousePhotoPopup(h) {
+  houseLayer.eachLayer(layer => { if (layer.h && layer.h.id === h.id) layer.openPopup(); });
+}
+function clearHouseFocus() {
+  if (!selectedHouseId) return;
+  selectedHouseId = null;
+  renderHouses();
 }
 function aggTo(t) {
   const ids = new Set(t.house_ids);
@@ -377,45 +617,53 @@ function aggTo(t) {
 }
 
 // ============ DASHBOARD + BIỂU ĐỒ ============
-function renderAll() {
-  const tot = {mem: 0, eld: 0, kid: 0, pol: 0, sup: 0, vn: 0, bh: 0};
-  houses.forEach(h => { tot.mem += h.members; tot.eld += h.elderly; tot.kid += h.children; if (h.policy) tot.pol++; if (h.support) tot.sup++; if (h.vneid) tot.vn++; if (h.bhyt) tot.bh++; });
-  const openRep = reports.filter(r => r.status !== 'Đã xử lý').length;
-  document.getElementById('dHos').innerHTML = houses.length + ' <small>hộ</small>';
-  document.getElementById('dMem').innerHTML = tot.mem + ' <small>người</small>';
-  document.getElementById('dEld').textContent = tot.eld;
-  document.getElementById('dKid').textContent = tot.kid;
-  document.getElementById('dPol').textContent = tot.pol;
-  document.getElementById('dSup').textContent = tot.sup;
-  document.getElementById('dVn').innerHTML = Math.round(tot.vn / houses.length * 100) + '<small>%</small>';
-  document.getElementById('dRp').textContent = openRep;
-  const houseTotal = Math.max(1, houses.length);
-  const vneidPct = Math.round(tot.vn / houseTotal * 100);
-  const bhytPct = Math.round(tot.bh / houseTotal * 100);
-  const reportTotal = Math.max(1, reports.length);
-  const doneReportPct = Math.round((reports.length - openRep) / reportTotal * 100);
-  document.getElementById('prioritySupport').textContent = tot.sup + ' hộ';
-  document.getElementById('priorityReports').textContent = openRep + ' điểm';
-  document.getElementById('priorityVneid').textContent = (houses.length - tot.vn) + ' hộ';
-  document.getElementById('progressVneid').textContent = vneidPct + '%';
-  document.getElementById('progressVneidBar').style.width = vneidPct + '%';
-  document.getElementById('progressBhyt').textContent = bhytPct + '%';
-  document.getElementById('progressBhytBar').style.width = bhytPct + '%';
-  document.getElementById('progressReports').textContent = doneReportPct + '%';
-  document.getElementById('progressReportsBar').style.width = doneReportPct + '%';
-  const bd = tos.map((t, i) => ({name: t.name, mem: aggTo(t).mem, color: TO_COLORS[i % TO_COLORS.length]})).sort((a, b) => b.mem - a.mem);
-  const max = Math.max(1, ...bd.map(b => b.mem));
-  document.getElementById('barChart').innerHTML = bd.map(b =>
-    '<div class="hbar"><span class="nm">' + b.name + '</span><span class="tr"><i style="width:' + Math.round(b.mem / max * 100) + '%;background:' + b.color + '"></i></span><span class="vv">' + b.mem + '</span></div>').join('');
-  const adults = Math.max(0, tot.mem - tot.eld - tot.kid);
-  const pc = x => Math.round(x / Math.max(1, tot.mem) * 100);
-  const c1 = pc(tot.kid), c2 = pc(adults), c3 = pc(tot.eld);
+function renderDashboardFromData(data) {
+  const t = data && data.totals ? data.totals : {};
+  const fmt = value => Number(value || 0).toLocaleString('vi-VN');
+  document.getElementById('dataBadge').textContent = 'DỮ LIỆU DASHBOARD · ' + fmt(t.households) + ' HỘ / ' + fmt(t.members) + ' NHÂN KHẨU';
+  document.getElementById('dHos').innerHTML = fmt(t.households) + ' <small>hộ</small>';
+  document.getElementById('dMem').innerHTML = fmt(t.members) + ' <small>người</small>';
+  document.getElementById('dEld').textContent = fmt(t.elderly);
+  document.getElementById('dKid').textContent = fmt(t.children);
+  const avg = Number(t.averageHouseholdSize || 0);
+  document.getElementById('dAvg').innerHTML = avg.toLocaleString('vi-VN', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' <small>người/hộ</small>';
+  document.querySelector('#overviewHead .sync').innerHTML = '<span class="sync-dot"></span> Excel import · ' + esc(data.source && data.source.asOf || 'đã cập nhật');
+
+  // Chỉ dùng các tổ có mã rõ ràng; loại bản ghi trùng mã trước khi vẽ.
+  const colors = ['#1e40af', '#b45309', '#065f46', '#7c3aed', '#be185d', '#0369a1', '#16a34a'];
+  const seenTo = new Set();
+  const rawRows = (data.byTo || []).filter(x => x && x.id != null && x.members > 0);
+  const rows = rawRows.filter(x => { if (seenTo.has(x.id)) return false; seenTo.add(x.id); return true; }).sort((a, b) => (a.id || 99) - (b.id || 99));
+  const assignedMembers = rows.reduce((sum, x) => sum + Number(x.members || 0), 0);
+  const max = Math.max(1, ...rows.map(x => x.members));
+  document.getElementById('barChart').innerHTML = rows.map((x, i) =>
+    '<div class="hbar"><span class="nm">' + esc(x.id == null ? 'Chưa rõ' : x.label) + '</span><span class="tr"><i style="width:' + Math.round(x.members / max * 100) + '%;background:' + colors[i % colors.length] + '"></i></span><span class="vv">' + fmt(x.members) + '</span></div>').join('');
+  document.getElementById('toCoverage').textContent = fmt(assignedMembers) + '/' + fmt(t.members) + ' người đã gán tổ';
+  const adults = Math.max(0, (t.members || 0) - (t.elderly || 0) - (t.children || 0));
+  const pc = x => Math.round(x / Math.max(1, t.members || 0) * 100);
+  const c1 = pc(t.children || 0), c2 = pc(adults), c3 = pc(t.elderly || 0);
   document.getElementById('donut').style.background = 'conic-gradient(#f59e0b 0 ' + c1 + '%, #2563eb ' + c1 + '% ' + (c1 + c2) + '%, #16a34a ' + (c1 + c2) + '% 100%)';
   document.getElementById('donutL').innerHTML =
-    '<span><i style="background:#f59e0b"></i>Trẻ em ' + tot.kid + '</span>' +
-    '<span><i style="background:#2563eb"></i>Người lớn ' + adults + '</span>' +
-    '<span><i style="background:#16a34a"></i>NCT ' + tot.eld + '</span>';
+    '<div class="demo-metric"><span><i class="demo-dot" style="background:#f59e0b"></i>Trẻ em</span><b>' + fmt(t.children) + '</b></div>' +
+    '<div class="demo-metric"><span><i class="demo-dot" style="background:#2563eb"></i>Người lớn</span><b>' + fmt(adults) + '</b></div>' +
+    '<div class="demo-metric"><span><i class="demo-dot" style="background:#16a34a"></i>Người cao tuổi</span><b>' + fmt(t.elderly) + '</b></div>';
+  const topTo = rows.slice().sort((a, b) => b.members - a.members)[0];
+  const topHousehold = (data.topHouseholds || [])[0];
+  const gender = data.gender || {};
+  document.getElementById('dashboardInsight').innerHTML =
+    '<div class="insight-row"><span>Tổ đông dân nhất</span><b>' + (topTo ? esc(topTo.label) + ' · ' + fmt(topTo.members) + ' người' : 'Chưa đủ dữ liệu') + '</b></div>' +
+    '<div class="insight-row"><span>Hộ đông người nhất</span><b>' + (topHousehold ? esc(topHousehold.head) + ' · ' + fmt(topHousehold.members) + ' khẩu' : 'Chưa đủ dữ liệu') + '</b></div>' +
+    '<div class="insight-row"><span>Cân bằng giới tính</span><b>Nam ' + fmt(gender.male) + ' · Nữ ' + fmt(gender.female) + '</b></div>';
+  const q = data.quality || {};
+  document.getElementById('qualitySummary').innerHTML =
+    '<div class="quality-row warn"><span>Chưa xác định tổ</span><b>' + fmt(q.membersWithoutTo) + ' người</b></div>' +
+    '<div class="quality-row"><span>Thiếu ngày ĐKTT</span><b>' + fmt(q.missingRegistrationDate) + ' dòng</b></div>' +
+    '<div class="quality-row"><span>Địa chỉ hiện tại khác trú</span><b>' + fmt(q.differentCurrentAddress) + ' dòng</b></div>';
+  document.getElementById('dashboardDataNote').textContent = 'Dashboard dùng ' + fmt(t.households) + ' hộ và ' + fmt(t.members) + ' nhân khẩu từ file Excel. Dữ liệu vị trí nhà được mở riêng trên bản đồ.';
+}
+function renderAll() {
   renderHouses(); renderReps(); renderTos(); applyFilter();
+  if (dashboardData) renderDashboardFromData(dashboardData);
   if (!hasFittedMap) resetMap();
 }
 
@@ -433,7 +681,7 @@ function setView(view) {
   document.getElementById('dashboardView').classList.toggle('is-active', !showMap);
   document.getElementById('mapView').classList.toggle('is-active', showMap);
   document.querySelectorAll('header .nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
-  if (showMap) setTimeout(() => { map.invalidateSize(); resetMap(); }, 0);
+  if (showMap) setTimeout(() => { map.invalidateSize(); if (!demoMapMode && !pendingHouseFocus) resetMap(); }, 0);
 }
 window.setView = setView;
 
@@ -455,6 +703,7 @@ function openTab(t) {
 }
 window.openTab = openTab;
 function showTo(t) {
+  clearHouseFocus();
   const a = aggTo(t);
   const color = TO_COLORS[(t.id - 1) % TO_COLORS.length];
   const list = houses.filter(h => toOf(h) === t.id);
@@ -467,14 +716,25 @@ function showTo(t) {
     list.map(h => '<div class="row" onclick="showHouse(byId(\'' + h.id + '\'))"><b>' + h.id + '</b> · ' + esc(h.owner) + ' · ' + h.members + ' người · ' + (h.vneid ? '🟦VNeID' : '⬜') + (h.bhyt ? ' 🟩BHYT' : '') + (h.policy ? ' 🚩' : '') + (h.support ? ' 🆘' : '') + '</div>').join('');
 }
 window.showHouse = function(h) {
+  if (selectedHouseId !== h.id) focusHouse(h);
   const near = reports.filter(r => Math.abs(r.pos[0] - h.c[1]) < 0.0012 && Math.abs(r.pos[1] - h.c[0]) < 0.0012);
-  panel.innerHTML = '<h2>🏠 ' + esc(h.id) + '</h2>' +
-    kv('Chủ hộ (ẩn danh)', esc(h.owner)) + kv('Tổ', 'Tổ ' + toOf(h)) +
-    kv('Nhân khẩu', h.members) + kv('Người cao tuổi', h.elderly) + kv('Trẻ em', h.children) +
-    kv('Hộ chính sách', h.policy ? 'Có 🚩' : 'Không') + kv('Hộ cần hỗ trợ', h.support ? 'Có 🆘' : 'Không') +
+  const members = Array.isArray(h.memberDetails) ? h.memberDetails : [];
+  const memberRows = members.length ? members.map((m, i) => {
+    const isHead = !!m.head || i === 0;
+    const dob = m.dateOfBirthDisplay || m.dob || m.dateOfBirth || '';
+    const meta = [isHead ? 'Chủ hộ' : '', dob, m.gender || ''].filter(Boolean).join(' · ');
+    return '<div class="member-row"><b>' + (isHead ? '👑 ' : '') + esc(m.name || 'Chưa nhập dữ liệu') + '</b>' + (meta ? '<span>' + esc(meta) + '</span>' : '') + '</div>';
+  }).join('') : '<div class="empty" style="padding:8px 0">Chưa có danh sách thành viên</div>';
+  panel.innerHTML = '<div class="house-detail-head"><div class="eyebrow">Nhà & hộ dân</div><h2>' + esc(h.owner || 'Chưa nhập dữ liệu') + '</h2><div class="house-code">' + esc(h.id) + '</div></div>' + housePhoto(h) +
+    '<span class="house-badge">HỘ DÂN</span><div class="house-id">' + esc(h.id) + '</div>' +
+    '<div class="house-stats"><div class="house-stat"><strong>' + h.members + '</strong><span>khẩu</span></div><div class="house-stat"><strong>' + (h.elderly || '—') + '</strong><span>NCT</span></div><div class="house-stat"><strong>' + (h.children || '—') + '</strong><span>trẻ em</span></div></div>' +
+    '<h3 class="house-section-title">Thông tin hộ</h3>' +
+    kv('Chủ hộ', esc(h.owner || 'Chưa nhập dữ liệu')) + kv('Số nhà', esc(h.householdNumber || '—')) + kv('Ghi chú', esc(h.address || 'Tổ ' + toOf(h) + ', Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng')) +
+    '<h3 class="house-section-title" style="margin-top:14px">Thành viên (' + (members.length || h.members) + ')</h3><div class="member-list">' + memberRows + '</div>' +
+    kv('Hộ chính sách', h.policy == null ? 'Chưa cập nhật' : (h.policy ? 'Có 🚩' : 'Không')) + kv('Hộ cần hỗ trợ', h.support == null ? 'Chưa cập nhật' : (h.support ? 'Có 🆘' : 'Không')) +
     kv('Thăm hỏi gần nhất', h.lastVisit || 'Chưa ghi nhận') +
-    '<div style="margin-top:6px"><b>VNeID mức 2:</b> ' + (h.vneid ? 'Đã định danh' : 'Chưa') + '</div>' + bar(h.vneid ? 100 : 8, '#2563eb') +
-    '<b>BHYT:</b> ' + (h.bhyt ? 'Đã có thẻ' : 'Chưa có') + bar(h.bhyt ? 100 : 8, '#16a34a') +
+    '<div style="margin-top:6px"><b>VNeID mức 2:</b> ' + (h.vneid == null ? 'Chưa cập nhật' : (h.vneid ? 'Đã định danh' : 'Chưa')) + '</div>' + bar(h.vneid == null ? 0 : (h.vneid ? 100 : 8), '#2563eb') +
+    '<b>BHYT:</b> ' + (h.bhyt == null ? 'Chưa cập nhật' : (h.bhyt ? 'Đã có thẻ' : 'Chưa có')) + bar(h.bhyt == null ? 0 : (h.bhyt ? 100 : 8), '#16a34a') +
     '<h3 style="margin:12px 0 6px">Phản ánh gần đây</h3>' +
     (near.length ? near.map(r => '<div class="rep">⚠️ ' + r.type + ' · <b>' + r.status + '</b></div>').join('') : '<div class="empty" style="padding:8px">Không có</div>') +
     '<div style="display:flex;gap:6px;margin-top:12px">' +
@@ -626,7 +886,7 @@ function printReport() {
   document.getElementById('reportArea').innerHTML =
     '<h2>ỦY BAN NHÂN DÂN XÃ HÒA TIẾN</h2>' +
     '<h2 style="text-align:center">BÁO CÁO NHÂN HỘ KHẨU – THÔN LỆ SƠN NAM</h2>' +
-    '<p>Ngày lập: ' + new Date().toLocaleDateString('vi-VN') + ' · Bản demo dữ liệu mô phỏng (Nghị định 13/2023/NĐ-CP)</p>' +
+    '<p>Ngày lập: ' + new Date().toLocaleDateString('vi-VN') + ' · Nguồn Import: backups/latest-drawn.json</p>' +
     '<table><tr><th>Tổ</th><th>Số hộ</th><th>Nhân khẩu</th><th>NCT</th><th>Trẻ em</th><th>Chính sách</th><th>Cần hỗ trợ</th></tr>' + rows + '</table>' +
     '<p><b>Tổng hợp:</b> ' + houses.length + ' hộ · ' + tot.mem + ' nhân khẩu · ' + tot.pol + ' hộ chính sách · ' + tot.sup + ' hộ cần hỗ trợ · ' + open.length + ' phản ánh đang xử lý.</p>' +
     '<p style="margin-top:40px;text-align:right">Trưởng thôn<br><i>(Ký, ghi rõ họ tên)</i></p>';
@@ -660,12 +920,12 @@ sBox.addEventListener('keydown', ev => {
 window.searchGo = function(id) {
   sRes.style.display = 'none'; sBox.value = '';
   const h = byId(id); if (!h) return;
+  pendingHouseFocus = id;
   openTab('chi'); showHouse(h);
   setTimeout(() => {
     map.invalidateSize();
-    map.flyTo([h.c[1], h.c[0]], 19, {duration: .7});
     houseLayer.eachLayer(l => { if (l.h && l.h.id === id) l.openPopup(); });
-  }, 90);
+  }, 180);
 };
 
 // ============ BỘ LỌC ============
@@ -689,22 +949,193 @@ function tog(k) {
 }
 
 // ============ DEMO 60S ============
-let demoRunning = false;
+let demoRunning = false, demoState = null;
+function demoOverlay(title, sub, index, total) {
+  const box = document.getElementById('demoOverlay');
+  box.classList.add('show');
+  document.getElementById('demoTitle').textContent = title;
+  document.getElementById('demoSub').textContent = sub;
+  document.getElementById('demoCount').textContent = index + '/' + total;
+  document.getElementById('demoProgress').style.width = Math.round(index / total * 100) + '%';
+}
+function showVillageOverview() {
+  clearHouseFocus();
+  setDemoFocus(null, null);
+  const total = houses.reduce((a, h) => ({mem: a.mem + h.members, eld: a.eld + h.elderly, kid: a.kid + h.children}), {mem: 0, eld: 0, kid: 0});
+  setView('map');
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('#tabs button')[0].classList.add('on');
+  panel.innerHTML = '<h2 style="color:#0f766e">🗺 Toàn cảnh Thôn Lệ Sơn Nam</h2>' +
+    '<div class="rep" style="border-color:#99f6e4;background:#f0fdfa">Ranh giới thôn và các tổ dân cư được lấy từ bản Import mới nhất.</div>' +
+    kv('Số nhà trên bản đồ', houses.length) + kv('Nhân khẩu đã nhập', total.mem) + kv('Người cao tuổi', total.eld) + kv('Trẻ em', total.kid) +
+    '<h3 style="margin:14px 0 6px">Các tổ dân cư</h3>' + tos.map(t => '<div class="row"><b>' + esc(t.name) + '</b> · ' + t.house_ids.length + ' nhà · ' + aggTo(t).mem + ' khẩu</div>').join('');
+  const villageBounds = villageBoundary ? L.latLngBounds(villageBoundary.map(p => [p[1], p[0]])) : null;
+  const villageCenter = villageBounds ? villageBounds.getCenter() : L.latLng(15.9606, 108.178);
+  map.invalidateSize({pan: false});
+  map.setView(villageCenter, 14, {animate: false});
+  requestAnimationFrame(() => {
+    if (villageBounds) map.flyToBounds(villageBounds.pad(0.08), {duration: 1.8, easeLinearity: .08, maxZoom: 15});
+    else map.flyTo(villageCenter, 15, {duration: 1.8, easeLinearity: .08});
+  });
+}
 window.startDemo = function() {
   if (demoRunning) return; demoRunning = true;
-  const steps = [];
-  tos.forEach((t, i) => steps.push(() => { openTab('chi'); showTo(t); }));
-  steps.push(() => { openTab('an'); anSinh(); });
-  steps.push(() => { openTab('rep'); repList(); });
-  steps.push(() => { openTab('bc'); baoCao(); });
-  let k = 0;
-  const tick = () => { if (k < steps.length) { steps[k++](); setTimeout(tick, 1700); } else demoRunning = false; };
-  map.flyTo([15.9606, 108.1855], 16);
-  setTimeout(tick, 700);
+  demoMapMode = true;
+  const steps = [{title: 'Toàn cảnh thôn', sub: 'Mở ranh giới Thôn Lệ Sơn Nam và tổng số liệu', run: showVillageOverview}];
+  tos.forEach(t => steps.push({title: t.name, sub: 'Zoom vào ranh tổ · xem hộ, khẩu, NCT và trẻ em', run: () => {
+    clearHouseFocus();
+    setDemoFocus(t.id, null);
+    openTab('chi'); showTo(t);
+    if (t.ring) {
+      const bounds = L.latLngBounds(t.ring.map(p => [p[1], p[0]]));
+      map.flyToBounds(bounds.pad(0.18), {duration: 2.4, easeLinearity: .06, maxZoom: 17});
+    }
+  }}));
+  const demoHouseIds = ['LSN-H004', 'LSN-H002', 'LSN-H001', 'LSN-H003'];
+  // Keep the four curated demo homes in the tour even when a source row is empty;
+  // their real-house photos are the visual anchor for this walkthrough.
+  const filled = demoHouseIds.map(id => byId(id)).filter(Boolean);
+  filled.forEach(h => steps.push({title: h.owner, sub: h.id + ' · hồ sơ chủ hộ và thành viên', run: () => {
+    setDemoFocus(toOf(h), h.id);
+    openTab('chi'); showHouse(h); map.flyTo([h.c[1], h.c[0]], 20, {duration: 2.1, easeLinearity: .06});
+    setTimeout(() => { if (demoRunning && demoFocusedHouse === h.id) openHousePhotoPopup(h); }, 1750);
+  }}));
+  steps.push({title: 'Báo cáo tổng hợp', sub: 'Kết thúc tour · tổng hợp theo từng tổ', run: () => { openTab('bc'); baoCao(); }});
+  demoState = {steps, index: 0};
+  runDemoStep();
 };
+function runDemoStep() {
+  if (!demoState) return;
+  const step = demoState.steps[demoState.index];
+  demoOverlay(step.title, step.sub, demoState.index + 1, demoState.steps.length);
+  step.run();
+}
+window.demoNext = function() {
+  if (!demoState) return;
+  if (demoState.index < demoState.steps.length - 1) { demoState.index++; runDemoStep(); }
+};
+window.demoPrev = function() {
+  if (!demoState) return;
+  if (demoState.index > 0) { demoState.index--; runDemoStep(); }
+};
+window.demoStop = function() {
+  demoRunning = false; demoState = null;
+  demoMapMode = false;
+  clearHouseFocus();
+  setDemoFocus(null, null);
+  document.getElementById('demoOverlay').classList.remove('show');
+};
+document.addEventListener('keydown', ev => {
+  if (!demoRunning) return;
+  if (ev.key === 'ArrowRight') { ev.preventDefault(); demoNext(); }
+  if (ev.key === 'ArrowLeft') { ev.preventDefault(); demoPrev(); }
+  if (ev.key === 'Escape') { ev.preventDefault(); demoStop(); }
+});
+
+// ============ CHATBOT DEEPSEEK ============
+let chatHistory = [];
+let chatBusy = false;
+function chatInline(text) {
+  return esc(text)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+function formatChatText(message) {
+  const lines = String(message == null ? '' : message).replace(/\r\n?/g, '\n').split('\n');
+  let html = '';
+  let listOpen = false;
+  const closeList = () => { if (listOpen) { html += '</div>'; listOpen = false; } };
+  lines.forEach(raw => {
+    const line = raw.trim();
+    if (!line) { closeList(); if (html && !html.endsWith('<div class="chat-gap"></div>')) html += '<div class="chat-gap"></div>'; return; }
+    const heading = line.match(/^#{1,3}\s+(.+)$/) || line.match(/^\*\*(.+?)\*\*$/);
+    if (heading) { closeList(); html += '<h4 class="chat-rich-title">' + chatInline(heading[1]) + '</h4>'; return; }
+    const item = line.match(/^[-•]\s+(.+)$/);
+    if (item) {
+      if (!listOpen) { html += '<div class="chat-list">'; listOpen = true; }
+      html += '<div class="chat-list-item"><span class="chat-list-mark">•</span><span>' + chatInline(item[1]) + '</span></div>';
+      return;
+    }
+    closeList();
+    html += '<p>' + chatInline(line) + '</p>';
+  });
+  closeList();
+  return '<div class="chat-rich">' + html + '</div>';
+}
+function addChatMessage(role, message) {
+  const box = document.getElementById('chatMessages');
+  if (!box) return;
+  const avatar = role === 'user' ? 'Bạn' : 'AI';
+  const safe = role === 'assistant' ? formatChatText(message) : chatInline(message);
+  box.insertAdjacentHTML('beforeend', '<div class="chat-message ' + role + '"><span class="chat-message-avatar">' + avatar + '</span><div class="chat-bubble ' + role + '">' + safe + '</div></div>');
+  const latest = box.lastElementChild;
+  if (!latest) return;
+  if (role === 'user') {
+    // Luôn đưa câu hỏi mới vào tầm nhìn để người dùng biết tin nhắn đã được nhận.
+    box.scrollTo({top: box.scrollHeight, behavior: 'smooth'});
+  } else {
+    // Với câu trả lời dài, giữ phần đầu câu trả lời trong khung chat thay vì nhảy thẳng xuống cuối.
+    const targetTop = Math.max(0, latest.offsetTop - 6);
+    box.scrollTo({top: targetTop, behavior: 'smooth'});
+  }
+}
+function setChatStatus(text) {
+  const status = document.getElementById('chatStatus');
+  if (status) status.textContent = text;
+}
+async function askChat(question) {
+  const input = document.getElementById('chatInput');
+  const send = document.getElementById('chatSend');
+  const message = String(question || (input && input.value) || '').trim();
+  if (!message || chatBusy) return;
+  if (input) input.value = '';
+  chatBusy = true;
+  if (send) send.disabled = true;
+  addChatMessage('user', message);
+  chatHistory.push({role: 'user', content: message});
+  setChatStatus('Đang phân tích dữ liệu…');
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message, history: chatHistory.slice(0, -1).slice(-6)}),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error(result.error || 'Chatbot không trả lời được');
+    addChatMessage('assistant', result.answer || 'Chưa có câu trả lời.');
+    chatHistory.push({role: 'assistant', content: result.answer || ''});
+    setChatStatus(result.mode === 'deepseek' ? 'DeepSeek đang sẵn sàng' : 'Chế độ offline');
+  } catch (error) {
+    const text = error && error.message ? error.message : 'Không kết nối được chatbot.';
+    addChatMessage('assistant', '⚠ ' + text);
+    setChatStatus('Chưa kết nối được DeepSeek');
+  } finally {
+    chatBusy = false;
+    if (send) send.disabled = false;
+    if (input) input.focus();
+  }
+}
+window.askChat = askChat;
+document.getElementById('chatForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  askChat();
+});
+document.getElementById('chatInput').addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && !ev.shiftKey) {
+    ev.preventDefault();
+    askChat();
+  }
+});
+addChatMessage('assistant', 'Mình đã sẵn sàng. Bạn có thể hỏi về tổng dân số, từng Tổ hoặc chất lượng dữ liệu Excel.');
 
 // ============ KHỞI TẠO ============
 renderAll();
+fetch('data/dashboard-real.json?refresh=' + Date.now()).then(r => r.json()).then(data => {
+  dashboardData = data;
+  renderDashboardFromData(data);
+}).catch(() => {});
 </script>
 </body>
 </html>

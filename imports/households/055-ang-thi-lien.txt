@@ -1,0 +1,4 @@
+Đặng Thị Liên | 27/09/1972 | Nữ | Đặng Thị Liên | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Phú Khiết | 10/10/1966 | Nam | Đặng Thị Liên | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Phú Thanh | 10/02/1991 | Nam | Đặng Thị Liên | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Phú Thiên | 25/10/1995 | Nam | Đặng Thị Liên | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

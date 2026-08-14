@@ -1,0 +1,4 @@
+Nguyễn Văn Lai | 10/10/1970 | Nam | Nguyễn Văn Lai | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Vinh Huy | 14/06/1999 | Nam | Nguyễn Văn Lai | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Phan Thị Yến | 25/10/1979 | Nữ | Nguyễn Văn Lai | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Vi Thảo | 24/03/2005 | Nữ | Nguyễn Văn Lai | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

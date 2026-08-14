@@ -1,0 +1,4 @@
+Nguyễn Minh Thắm | 01/01/1972 | Nam | Nguyễn Minh Thắm | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Minh Nhật | 08/05/1999 | Nam | Nguyễn Minh Thắm | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thị Hậu | 23/07/1970 | Nữ | Nguyễn Minh Thắm | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Minh Nguyệt | 17/05/2004 | Nữ | Nguyễn Minh Thắm | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

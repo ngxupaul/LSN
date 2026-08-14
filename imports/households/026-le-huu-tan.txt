@@ -1,0 +1,6 @@
+Lê Hữu Tân | 12/02/1950 | Nam | Lê Hữu Tân | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Đinh Thị Phong | 01/03/1950 | Nữ | Lê Hữu Tân | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Hữu Quỳnh | 01/07/1993 | Nam | Lê Hữu Tân | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Bùi Thị Đình | 20/06/1994 | Nữ | Lê Hữu Tân | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thị Nhung | 05/07/1980 | Nữ | Lê Hữu Tân | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Đỗ Minh Huy | 25/04/1999 | Nam | Lê Hữu Tân | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

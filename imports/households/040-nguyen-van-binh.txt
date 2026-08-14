@@ -1,0 +1,4 @@
+Nguyễn Văn Bình | 20/12/1976 | Nam | Nguyễn Văn Bình | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Minh Yến | 15/12/1999 | Nữ | Nguyễn Văn Bình | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Xuân Ái | 19/11/1979 | Nữ | Nguyễn Văn Bình | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Văn An | 29/07/2005 | Nam | Nguyễn Văn Bình | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

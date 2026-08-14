@@ -1,0 +1,5 @@
+Nguyễn Văn Sự | 03/02/1973 | Nam | Nguyễn Văn Sự | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Văn Việt | 01/08/1997 | Nam | Nguyễn Văn Sự | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Diễm Kiều | 08/11/2001 | Nữ | Nguyễn Văn Sự | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Vân | 01/05/1974 | Nữ | Nguyễn Văn Sự | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thị Lài | 18/04/1995 | Nữ | Nguyễn Văn Sự | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

@@ -1,0 +1,5 @@
+Lê Văn Phi | 01/01/1970 | Nam | Lê Văn Phi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Hoà | 01/01/1973 | Nữ | Lê Văn Phi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thị Quầy Thương | 07/04/1996 | Nữ | Lê Văn Phi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thị Mỹ Linh | 20/03/2001 | Nữ | Lê Văn Phi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Lê Thảo Nguyên | 13/06/2007 | Nữ | Lê Văn Phi | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng

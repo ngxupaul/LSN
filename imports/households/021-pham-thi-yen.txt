@@ -1,0 +1,6 @@
+Phạm Thị Yến | 01/01/1943 | Nữ | Phạm Thị Yến | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Đặng Thị Kim Liên | 16/04/1966 | Nữ | Phạm Thị Yến | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Trần Đình Khánh | 22/07/1991 | Nam | Phạm Thị Yến | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Nguyễn Thị Bích Vân | 01/05/1990 | Nữ | Phạm Thị Yến | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Võ Thị Ái | 14/01/1990 | Nữ | Phạm Thị Yến | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
+Trần Đình Duy | 30/10/1989 | Nam | Phạm Thị Yến | Tổ 3, Thôn Lệ Sơn Nam, Xã Hoà Tiến, Thành Phố Đà Nẵng
