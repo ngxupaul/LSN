@@ -58,6 +58,27 @@ python3 build_app.py
 
 Script đọc các file trong `data/`, nhúng vào `index.html` rồi ghi đè — mở lại trang là thấy thay đổi.
 
+## Dashboard EDA + chatbot DeepSeek
+
+Dashboard của `smart-village.html` đọc số liệu nhân khẩu từ workbook Excel và giữ dữ liệu bản đồ độc lập:
+
+```bash
+/Users/paul/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 generate_dashboard_data.py
+python3 server.py
+```
+
+Pipeline tạo dashboard tách hộ theo từng khối dòng liên tiếp trong file import, thay vì chỉ gom theo tên chủ hộ. Cách này tránh gộp nhầm các hộ khác nhau nhưng trùng tên; bản dữ liệu hiện có 569 hộ và 2.150 nhân khẩu.
+
+Để bật trả lời bằng DeepSeek, cấu hình khóa trong biến môi trường (không ghi khóa vào mã nguồn):
+
+```bash
+export DEEPSEEK_API_KEY="your-key"
+export DEEPSEEK_MODEL="deepseek-v4-flash"
+python3 server.py
+```
+
+Không có `DEEPSEEK_API_KEY`, chatbot vẫn trả lời các câu hỏi tổng hợp, theo tổ và chi tiết thành viên của từng hộ bằng chế độ offline. Endpoint proxy là `POST /api/chat`; khóa API chỉ được dùng ở server.
+
 ## Xuất / Import dữ liệu
 
 - **⬇ Xuất GeoJSON**: bấm nút phải trên — tải file `le-son-nam-data.geojson`
